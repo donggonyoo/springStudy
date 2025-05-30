@@ -27,11 +27,9 @@ public class Main1 {
 			System.out.println("a2.hashCode() : "+a2.hashCode());
 			System.out.println("[main]a1==a2 : "+(a1==a2));
 			service.getArticleAndReadCnt(0);
-			
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			System.out.println("[main1_Exception] : "+e.getMessage());
 		}
-		
 	}
-
 }
