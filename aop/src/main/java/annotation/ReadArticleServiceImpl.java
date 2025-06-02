@@ -1,5 +1,6 @@
 package annotation;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
@@ -7,6 +8,8 @@ import org.springframework.stereotype.Component;
 //ReadArticleService의 구현체Impl
 public class ReadArticleServiceImpl implements ReadArticleService{
 
+	/*@Autowired
+	private Article art;*/
 
 	@Override
 	public Article getArticleAndReadCnt(int id) throws Exception {
@@ -14,6 +17,8 @@ public class ReadArticleServiceImpl implements ReadArticleService{
 			throw new Exception("0입력 불가");
 		}
 		return new Article(id);
+		/*art.setId(id);
+		return art;*/
 	}
 
 }

@@ -1,5 +1,6 @@
 package kr.gd.aop;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -10,5 +11,4 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 @EnableAspectJAutoProxy //AOP설정함 , AOP관련 어노테이션 기능 사용
 public class AppCtx {
-
 }
