@@ -13,12 +13,15 @@
 	<th width="80">상품ID</th>
 	<th width="80">상품명</th>
 	<th width="80">가격</th>
+	<th width="80">수정</th><th width="80">삭제</th>
 </tr>	
 <c:forEach items="${itemList}" var="item">
 <tr>
 	<td align="center">${item.id}</td>
 	<td align="left"><a href="detail?id=${item.id}">${item.name}</a></td>
 	<td align="right">${item.price}</td>
+	<td align="center"><a href="update?id=${item.id}">수정</a></td>
+	<td align="center"><a href="delete?id=${item.id}">삭제</a></td>
 </tr>
 	</c:forEach>
 </table>

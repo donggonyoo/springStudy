@@ -49,5 +49,7 @@ public class DBConfig {
 	public SqlSessionTemplate sqlSessionTemplate() throws Exception{
 		return new SqlSessionTemplate(sqlSessionFactory());
 	}
+	
+	
 
 }
