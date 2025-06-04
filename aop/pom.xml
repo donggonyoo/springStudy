@@ -43,7 +43,6 @@
 			<artifactId>aspectjweaver</artifactId>
 			<version>1.9.6</version>
 		</dependency>
-
 		<!--lombok-->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
