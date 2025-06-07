@@ -101,6 +101,7 @@ public class UserController {
 		}
 		if(user.getPassword().equals(dbUser.getPassword())) { //비밀번호일치
 			session.setAttribute("loginUser", dbUser);
+			//mypage에서 파라미터로넘긴 아이디를 이용해 유저검증 실시
 			mav.setViewName("redirect:mypage?userid=" +user.getUserid());
 		}else {
 			bresult.reject("error.login.password");
@@ -108,6 +109,32 @@ public class UserController {
 		}
 		return mav;
 	}
+	
+	@RequestMapping("mypage")
+	public ModelAndView idCheckMypage(String userid, HttpSession session) {
+		ModelAndView mav = new ModelAndView();
+		//아이디를이용해 객체를 뽑음
+		User user = service.selectUser(userid);
+		mav.addObject("user",user);
+		return mav;
+	}
+	
+	@RequestMapping("logout")
+	public String logout(HttpSession session) {
+		session.invalidate();
+		return "redirect:login";
+	}
+	
+	//해당 메서드도AOP방식으로로그인검증을 함 !!!
+	//(하지만 하나의Mapping으로 두가지를 처리하는 방식은 비추임)
+	@GetMapping({"update","delete"})
+	public ModelAndView idCheckUser(String userid,HttpSession session) {
+		ModelAndView mav = new ModelAndView();
+		User user = service.selectUser(userid);
+		mav.addObject(user);
+		return mav;
+	}
+	
 
 
 }
