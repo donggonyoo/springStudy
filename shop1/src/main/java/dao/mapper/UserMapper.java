@@ -3,8 +3,10 @@ package dao.mapper;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import logic.User;
 
@@ -25,6 +27,27 @@ public interface UserMapper {
 			"<if test='userid != null'> where userid=#{userid}</if>",
 			"</script>"})
 	List<User> select(Map<String,Object> param);
+
+	
+	@Update("update useraccount set username=#{username}, "
+			+ " birthday=#{birthday}, address=#{address}, "
+			+ " phoneno=#{phoneno}, email=#{email}, "
+			+ " postcode=#{postcode}"
+			+ "where userid=#{userid}")
+	void update(User user);
+
+	@Delete("delete from useraccount where userid=#{userid}")
+	void delete(String userid);
+
+	@Update("update useraccount set password=#{password} where userid=#{userid}")
+	void changePw(User loginUser);
+
+	@Select({"<script>",
+		"select ${col} from useraccount "
+		+ "where email=#{email} and phoneno=#{phoneno} "
+		+ "<if test='userid != null'> and userid=#{userid}</if> "
+		+ "</script>"})
+	String search(Map<String, Object> param);
 	
 
 }

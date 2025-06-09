@@ -37,4 +37,25 @@ public class UserService {
 		return dao.selectOne(userid);
 	}
 
+	public void userUpdate( User user) {
+		 dao.update(user);
+	}
+
+	public void userDelete(String userid) {
+		dao.delete(userid);
+	}
+
+	public void changePw(User loginUser) {
+		dao.changepw(loginUser);
+		
+	}
+
+	public String getSearch(User user) {
+		return dao.search(user);
+	}
+
+	
+	
+
+
 }

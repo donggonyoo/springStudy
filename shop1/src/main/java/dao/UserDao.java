@@ -1,7 +1,12 @@
 package dao;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -38,4 +43,35 @@ public class UserDao {
 		param.put("userid", userid);
 		return template.selectOne("dao.mapper.UserMapper.select",param);
 	}
+
+	public void update(User user) {
+		 template.getMapper(cls).update(user);
+		
+	}
+
+	public void delete(String userid) {
+		template.getMapper(cls).delete(userid);
+		
+	}
+
+	public void changepw(User loginUser) {
+		template.getMapper(cls).changePw(loginUser);
+		
+	}
+
+	public String search(User user) {
+		param.clear();
+		String col = "userid"; //아이디검색
+		if(user.getUserid()!=null) {
+			col = "password";//비밀번호검색
+		}
+		param.clear();
+		param.put("col", col);
+		param.put("userid", user.getUserid());
+		param.put("email", user.getEmail());
+		param.put("phoneno", user.getPhoneno());
+		return template.getMapper(cls).search(param);
+	}
+	
+	
 }

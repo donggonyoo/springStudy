@@ -17,7 +17,7 @@ import logic.User;
 @Component
 @Aspect
 public class UserLoginAspect {
-	//UserController에 idCheck로 시작하는 모든 메서드를 실행하기 전,후에 해당메서드호출
+	//UserController에 idCheck로 시작하는 모든 메서드를 실행하기 전,후(around)에 해당메서드호출
 	@Around("execution(* controller.User*.idCheck*(..)) && args(..,userid,session)")
 	public Object userIdCheck(ProceedingJoinPoint joinPoint,
 			String userid,HttpSession session) throws Throwable{
@@ -31,5 +31,16 @@ public class UserLoginAspect {
 		}
 		return joinPoint.proceed();
 	}
+	
+	@Around("execution(* controller.User*.loginCheck*(..)) && args(..,session)")
+	public Object loginCheck(ProceedingJoinPoint joinPoint,
+			HttpSession session) throws Throwable{
+		User loginUser = (User)session.getAttribute("loginUser");
+		if(loginUser==null || !(loginUser instanceof User)) {
+			throw new ShopException("[loginChk]로그인 필요", "login");			
+		}
+		return joinPoint.proceed();
+	}
+	
 
 }
