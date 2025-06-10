@@ -23,7 +23,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import exception.ShopException;
+import logic.Sale;
 import logic.User;
+import service.ShopService;
 import service.UserService;
 
 @Controller
@@ -32,6 +34,9 @@ public class UserController {
 
 	@Autowired
 	private UserService service;
+	
+	@Autowired
+	private ShopService shopService;
 
 	@GetMapping("*")
 	public ModelAndView form() {
@@ -111,9 +116,14 @@ public class UserController {
 		ModelAndView mav = new ModelAndView();
 		//아이디를이용해 객체를 뽑음
 		User user = service.selectUser(userid);
+		
+		List<Sale> salelist = shopService.saleList(userid);
 		mav.addObject("user",user);
+		mav.addObject("salelist",salelist);
 		return mav;
 	}
+	
+	
 
 	@RequestMapping("logout")
 	public String logout(HttpSession session) {
@@ -288,10 +298,9 @@ public class UserController {
 			bresult.reject(code);
 			return mav;
 		}
-		//url정보가 pw면 무작위비밀번호로업데이트 후 보여준다
+		//url정보가 pw면 무작위비밀번호로 업데이트 
 		if(url.equals("pw")) {
-			String tempPw = getTempPw();
-			user.setPassword(tempPw);
+			user.setPassword(getTempPw());
 			service.changePw(user);
 			result = user.getPassword();
 		}

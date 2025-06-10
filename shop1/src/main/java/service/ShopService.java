@@ -1,6 +1,8 @@
 package service;
 
 import java.io.File;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,13 +13,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import dao.ItemDao;
+import dao.SaleDao;
+import dao.SaleItemDao;
+import logic.Cart;
 import logic.Item;
+import logic.ItemSet;
+import logic.Sale;
+import logic.SaleItem;
+import logic.User;
 
 @Service
 public class ShopService {
 
 	@Autowired
 	private ItemDao itemDao;
+	
+	@Autowired
+	private SaleDao saleDao;
+	
+	@Autowired
+	private SaleItemDao saleItemDao;
 
 	public List<Item> itemList() {
 		return itemDao.list();
@@ -74,6 +89,44 @@ public class ShopService {
 	public void deleteItem(Integer id) {
 		itemDao.deleteItem(id);
 		
+	}
+
+	public Sale checkend(User loginUser, Cart cart) {
+		int maxSaleid = saleDao.getMaxSaleId(); //가장높은 주문번호 반환
+		Sale sale = new Sale();
+		sale.setSaleid(maxSaleid+1);
+		sale.setUser(loginUser);
+		sale.setUserid(loginUser.getUserid());  //세션정보(로그인)인 userid값 저장
+		//sale.setSaledate(new Date()); insert시 now로 고정되어있음
+		saleDao.insert(sale); //sale테이블에 해당객체의정보들 추가
+		
+		int seq = 0;
+		//ItemSet : item 객체 , 수량이 존재
+		List<ItemSet> itemSetList = cart.getItemSetList();
+		for(ItemSet is : itemSetList) {
+			//++seq : 2개이상 상품 동시 주문시 saleid가 같다. 
+			//seq를 달리해 구분함
+			SaleItem saleItem = new SaleItem(sale.getSaleid(), ++seq, is);
+			sale.getItemList().add(saleItem);//sale의 list에 넣기
+			saleItemDao.insert(saleItem);
+		}
+		return sale; //sale " 주문정보,고객정보,주문상품 등
+	}
+
+	public List<Sale> saleList(String userid) {
+		List<Sale> list = saleDao.saleList(userid);//userid사용자의 주문정보목록
+		System.out.println("list ::: "+list);
+		for (Sale sa : list) {
+			//saleItemList : 주문번호에맞는 주문상품목록
+			List<SaleItem> saleItemList = saleItemDao.list(sa.getSaleid());
+			System.out.println("saleItemList :::: "+saleItemList);
+			for (SaleItem si : saleItemList) {
+				Item item = itemDao.getItem(si.getItemid());
+				si.setItem(item);
+			}
+			sa.setItemList(saleItemList);
+		}
+		return list;
 	}
 
 }

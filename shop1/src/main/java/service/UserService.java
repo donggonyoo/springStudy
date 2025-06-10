@@ -1,5 +1,7 @@
 package service;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -8,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import dao.UserDao;
+import logic.Sale;
 import logic.User;
 
 @Service
@@ -53,6 +56,12 @@ public class UserService {
 	public String getSearch(User user) {
 		return dao.search(user);
 	}
+
+	public List<User> selectList() {
+		return dao.list();
+	}
+
+	
 
 	
 	

@@ -48,6 +48,9 @@ public interface UserMapper {
 		+ "<if test='userid != null'> and userid=#{userid}</if> "
 		+ "</script>"})
 	String search(Map<String, Object> param);
+
+	@Select("select * from useraccount")
+	List<User> list();
 	
 
 }

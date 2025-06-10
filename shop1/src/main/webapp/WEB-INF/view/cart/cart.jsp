@@ -110,9 +110,9 @@
             </tr>
         </tbody>
     </table>
-    <div class="message">
-        ${message}
-    </div>
+    
+    <div class="message">${message}</div>
+    
     <div class="action-links">
         <a href="../item/list" class="btn-shop">상품목록</a>
         <a href="checkout" class="btn-checkout">주문하기</a>

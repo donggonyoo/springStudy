@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 
 import dao.mapper.ItemMapper;
 import dao.mapper.UserMapper;
+import logic.Sale;
 import logic.User;
 
 @Repository
@@ -72,6 +73,12 @@ public class UserDao {
 		param.put("phoneno", user.getPhoneno());
 		return template.getMapper(cls).search(param);
 	}
+
+	public List<User> list() {
+		return template.getMapper(cls).list();
+	}
+
+	
 	
 	
 }

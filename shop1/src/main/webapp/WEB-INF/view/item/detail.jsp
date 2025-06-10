@@ -5,7 +5,7 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 
 <c:set var="path" value="${pageContext.request.contextPath}"
-	scope="application" />
+	scope="application"/>
 <!DOCTYPE html>
 <html>
 <head>

@@ -14,6 +14,16 @@ public class Cart {
 	}
 	
 	public void push(ItemSet set) {
+		
+		Integer count = set.getQuantity();
+		for (ItemSet old : itemSetList) {
+			//old : 추가되어있는 ItemSet객체
+			if(set.getItem().getId()==old.getItem().getId()) {
+				count = old.getQuantity() + set.getQuantity();
+				old.setQuantity(count);
+				return;
+			}
+		}
 		itemSetList.add(set);
 	}
 	
