@@ -1,0 +1,26 @@
+package kr.gdu.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import kr.gdu.dao.BoardDao;
+import kr.gdu.logic.Board;
+
+
+@Service
+public class BoardService {
+	@Autowired
+	private BoardDao dao;
+
+	public int boardcount(String boardid, String searchtype,
+			String searchcontent) {
+		return dao.count(boardid,searchtype,searchcontent);
+	}
+
+	public List<Board> boardlist(Integer pageNum, int limit, String boardid,
+			String searchtype, String searchcontent) {		
+		return dao.list(pageNum,limit,boardid,searchtype,searchcontent);
+	}
+}
