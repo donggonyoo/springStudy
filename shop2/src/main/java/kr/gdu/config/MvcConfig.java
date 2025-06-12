@@ -21,7 +21,6 @@ import com.zaxxer.hikari.HikariDataSource;
 
 
 @Configuration //spring 환경설정
-@EnableAspectJAutoProxy //AOP사용을 위한설
 public class MvcConfig  implements WebMvcConfigurer{
 
 	//예외처리 객체
