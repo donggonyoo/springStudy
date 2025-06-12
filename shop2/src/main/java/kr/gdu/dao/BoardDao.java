@@ -35,7 +35,7 @@ public class BoardDao {
 		param.put("boardid", boardid);
 		param.put("searchtype", searchtype);
 		param.put("searchcontent", searchcontent);
-		return template.getMapper(cls).list(param);
+		return template.getMapper(cls).select(param);
 	}
 	
 	
