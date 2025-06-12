@@ -2,16 +2,16 @@ package kr.gdu.controller;
 
 import java.util.List;
 import java.util.Map;
-import kr.gdu.service.ShopService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import jakarta.servlet.http.HttpSession;
-import kr.gdu.Shop2Application;
 import kr.gdu.logic.Board;
 import kr.gdu.service.BoardService;
 
@@ -35,10 +35,11 @@ public class BoardController {
 	 * @RequestParam : 파라미터값을 Map 객체에 매핑하여 전달
 	 */
 	@RequestMapping("list")
-	public ModelAndView list(@RequestParam Map<String,String> param,
-			 HttpSession session) {
-//		System.out.println("param:" + param);
-		Integer pageNum = null;
+	public String list(@RequestParam Map<String,String> param,
+			 HttpSession session,Model model) {
+
+	
+		int pageNum = 0;
 		for(String key : param.keySet()) {
 			if(param.get(key) == null || param.get(key).trim().equals("")) {
 			   param.put(key, null);	
@@ -52,8 +53,6 @@ public class BoardController {
 		String boardid = param.get("boardid");
 		String searchtype = param.get("searchtype");
 		String searchcontent = param.get("searchcontent");
-		
-		ModelAndView mav = new ModelAndView();
 		String boardName = null;
 		switch(boardid) {
 		   case "1" : boardName = "공지사항"; break;
@@ -68,20 +67,21 @@ public class BoardController {
 		int listcount = service.boardcount(boardid,searchtype,searchcontent); 
 		List<Board> boardlist = service.boardlist
 				          (pageNum,limit,boardid,searchtype,searchcontent);
+		
 		int maxpage = (int)((double)listcount/limit + 0.95); 
 		int startpage = (int)((pageNum/10.0 + 0.9) - 1) * 10 + 1;
 		int endpage = startpage + 9;
 		if(endpage > maxpage) endpage = maxpage;
-		int boardno = listcount - (pageNum - 1) * limit;
-		mav.addObject("boardid",boardid);  
-		mav.addObject("boardName", boardName); 
-		mav.addObject("pageNum", pageNum); 
-		mav.addObject("maxpage", maxpage); 
-		mav.addObject("startpage", startpage);
-		mav.addObject("endpage", endpage); 
-		mav.addObject("listcount", listcount);
-		mav.addObject("boardlist", boardlist);
-		mav.addObject("boardno", boardno);		
-		return mav;
+		int boardno = listcount - (pageNum - 1) * limit;		
+		model.addAttribute("boardid",boardid);
+		model.addAttribute("boardName",boardName);
+		model.addAttribute("pageNum",pageNum);
+		model.addAttribute("maxpage",maxpage);
+		model.addAttribute("startpage",startpage);
+		model.addAttribute("endpage",endpage);
+		model.addAttribute("listcount",listcount);
+		model.addAttribute("boardlist",boardlist);
+		model.addAttribute("boardno",boardno);
+		return "board/list";
 	}
 }

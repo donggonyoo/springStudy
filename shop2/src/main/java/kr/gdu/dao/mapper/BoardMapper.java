@@ -6,29 +6,33 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import kr.gdu.dto.board.BoardCountDto;
 import kr.gdu.logic.Board;
 @Mapper
 public interface BoardMapper {
-   
     String select = "select num,writer,pass,title,content,file1 fileurl,"
-      + " regdate, readcnt, grp, grplevel, grpstep, boardid from board";
+		+ " regdate, readcnt, grp, grplevel, grpstep, boardid from board";
+    
     
     @Select({"<script>",
-      "select count(*) from board where boardid=#{boardid} ",
+   	"select count(*) from board where boardid=#{boardid} ",
     "<if test='searchtype != null'> "
     + " and ${searchtype} like '%${searchcontent}%'</if>",
-      "</script>"})
-   int count(Map<String, Object> param);
+   	"</script>"})
+	int count(BoardCountDto dto);
     
     @Select({"<script>",
-       select,
-      "<if test='num != null'> where num = #{num}</if>",
-      "<if test='boardid != null'> where boardid = #{boardid} </if>",
-      "<if test='searchtype != null'> "
-      + " and ${searchtype} like '%${searchcontent}%'</if>",
-      "<if test='limit != null'> "
-      + " order by grp desc, grpstep asc limit #{startrow}, #{limit}</if>",
-      "</script>"})    
-   List<Board> select(Map<String, Object> param);
-   
+        select,
+        "<where>", 
+        "<if test='num != null'> num = #{num} </if>",
+        "<if test='num == null and boardid != null'> boardid = #{boardid} </if>",
+        "<if test='searchtype != null'> and ${searchtype} like '%${searchcontent}%'</if>",
+        "</where>",
+        "<if test='limit != null and startrow != null'> "
+        + " order by grp desc, grpstep asc limit #{startrow},#{limit}</if>",
+        "<if test='limit != null and startrow == null'> "
+        + " order by grp desc, grpstep asc limit 0,#{limit}</if>",
+        "</script>"})    
+	List<Board> select(Map<String, Object> param);
+	
 }

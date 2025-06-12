@@ -9,34 +9,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import kr.gdu.dao.mapper.BoardMapper;
-import kr.gdu.dao.mapper.ItemMapper;
+import kr.gdu.dto.board.BoardCountDto;
 import kr.gdu.logic.Board;
 
 @Repository
 public class BoardDao {
-	@Autowired //SqlSessionTemplate주입 (DBConfig에서 @bean으로 등록 돼 있음)
+	
+	@Autowired
 	private SqlSessionTemplate template;
-	
+	private Class<BoardMapper> cls = BoardMapper.class;
 	private Map<String,Object> param = new HashMap<>();
-	private final Class<BoardMapper> cls = BoardMapper.class;
 	
-	public int count(String boardid, String searchtype, String searchcontent) {
+	public int count(BoardCountDto dto) {
+		int count = template.getMapper(cls).count(dto);
+		return count;
+	}	
+	public List<Board> list	(Integer pageNum, int limit, 
+			String boardid, String searchtype, String searchcontent) {
 		param.clear();
-		param.put("boardid", boardid);
-		param.put("searchtype", searchtype);
-		param.put("searchcontent", searchcontent);
-		return template.getMapper(cls).count(param);
-	}
-
-	public List<Board> list(Integer pageNum, int limit, String boardid, String searchtype, String searchcontent) {
-		param.clear();
-		param.put("pageNum", pageNum);
-		param.put("limit", limit);
-		param.put("boardid", boardid);
-		param.put("searchtype", searchtype);
-		param.put("searchcontent", searchcontent);
+		param.put("startrow", (pageNum - 1) * limit); 
+		param.put("limit",  limit);		
+		param.put("boardid",  boardid);		
+		param.put("searchtype",searchtype);
+		param.put("searchcontent",searchcontent);
 		return template.getMapper(cls).select(param);
 	}
-	
 	
 }

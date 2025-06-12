@@ -4,8 +4,8 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <sitemesh:write property="title" />
-<sitemesh:write property="head" />
-<sitemesh:write property="body" />
+   <sitemesh:write property="head" />
+   <sitemesh:write property="body"  />
 
 <!DOCTYPE html>
 <html lang="ko">
