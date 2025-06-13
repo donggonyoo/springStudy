@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import kr.gdu.dto.board.BoardDetailDto;
+import kr.gdu.dto.board.DeleteBoardDto;
 import kr.gdu.exception.ShopException;
 import kr.gdu.logic.Board;
 import kr.gdu.service.BoardService;
@@ -29,12 +30,15 @@ import kr.gdu.service.BoardService;
 @RequestMapping("board")
 public class BoardController {
 
+    private final ItemController itemController;
+
     private final UserController userController;
 	@Autowired
 	private BoardService service;
 
-    BoardController(UserController userController) {
+    BoardController(UserController userController, ItemController itemController) {
         this.userController = userController;
+        this.itemController = itemController;
     }
 	
 	@GetMapping("*")
@@ -154,6 +158,7 @@ public class BoardController {
 		else if(boardid.equals("3")) {
 			mav.addObject("boardName","Q&A");
 		}
+		mav.addObject("num",num);
 		return mav;
 	}
 	
@@ -179,5 +184,24 @@ public class BoardController {
 					"&boardid="+dbBoard.getBoardid());
 		}
 	}
+	
+	@PostMapping("delete")
+	public String update( 
+			@Valid @ModelAttribute DeleteBoardDto dto,BindingResult bresult,Model model) {
+		System.out.println("ksfjskfjskf : "+dto);
+		Board dbBoard = service.getBoard(dto.getNum());
+		System.out.println("LLLLLLL"+dbBoard);
+		if(!dbBoard.getPass().equals(dto.getPass())) {
+			bresult.reject("error.dto.pass");
+			model.addAttribute("num",dto.getNum());
+			model.addAttribute("boardid",dto.getBoardid());
+			return "board/delete";
+		}
+		
+		service.boardDelete(dto);
+		return "redirect:list?boardid="+dbBoard.getBoardid();
+		
+	}
+	
 	
 }

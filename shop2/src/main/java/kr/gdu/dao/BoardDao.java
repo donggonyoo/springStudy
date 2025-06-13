@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import kr.gdu.dao.mapper.BoardMapper;
 import kr.gdu.dto.board.BoardCountDto;
 import kr.gdu.dto.board.BoardDetailDto;
+import kr.gdu.dto.board.DeleteBoardDto;
 import kr.gdu.logic.Board;
 
 @Repository
@@ -52,6 +53,10 @@ public class BoardDao {
 	
 	public void update(Board board) {
 		template.getMapper(cls).update(board);
+		
+	}
+	public void delete(DeleteBoardDto dto) {
+		template.getMapper(cls).delete(dto);
 		
 	}
 	

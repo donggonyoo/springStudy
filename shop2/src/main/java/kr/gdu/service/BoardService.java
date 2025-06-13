@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import kr.gdu.dao.BoardDao;
 import kr.gdu.dto.board.BoardCountDto;
 import kr.gdu.dto.board.BoardDetailDto;
+import kr.gdu.dto.board.DeleteBoardDto;
 import kr.gdu.logic.Board;
 
 @Service
@@ -75,6 +76,10 @@ public class BoardService {
 			board.setFileurl(board.getFile1().getOriginalFilename());
 		}
 		boardDao.update(board);
+		
+	}
+	public void boardDelete(DeleteBoardDto dto) {
+		boardDao.delete(dto);
 		
 	}
 

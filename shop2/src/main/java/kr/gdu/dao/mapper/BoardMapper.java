@@ -3,6 +3,7 @@ package kr.gdu.dao.mapper;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import kr.gdu.dto.board.BoardCountDto;
 import kr.gdu.dto.board.BoardDetailDto;
+import kr.gdu.dto.board.DeleteBoardDto;
 import kr.gdu.logic.Board;
 @Mapper
 public interface BoardMapper {
@@ -62,6 +64,9 @@ public interface BoardMapper {
     		+ "content=#{content},file1=#{fileurl} "
     		+ "where num=#{num}")
 	void update(Board board);
+
+    @Delete("delete from board where num=#{num}")
+	void delete(DeleteBoardDto dto);
     
     
 	
