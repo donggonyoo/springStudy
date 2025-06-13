@@ -3,14 +3,19 @@ package kr.gdu.dao.mapper;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import kr.gdu.dto.board.BoardCountDto;
+import kr.gdu.dto.board.BoardDetailDto;
 import kr.gdu.logic.Board;
 @Mapper
 public interface BoardMapper {
-    String select = "select num,writer,pass,title,content,file1 fileurl,"
+    String select = "select num,writer,pass,title,content,file1 AS fileurl,"
 		+ " regdate, readcnt, grp, grplevel, grpstep, boardid from board";
     
     
@@ -34,5 +39,30 @@ public interface BoardMapper {
         + " order by grp desc, grpstep asc limit 0,#{limit}</if>",
         "</script>"})    
 	List<Board> select(Map<String, Object> param);
+
+    
+    @Select(select+" where num=#{num}")
+	Board selectOne(int num);
+    
+    @Update("update board set readcnt = readcnt+1 where num=#{val}")
+    void addReadcnt(int num);
+
+    @Select("select ifnull(max(num),1) from board")
+	int maxNum();
+
+    @Insert("insert into board "
+    		+ "(num,boardid,writer,pass,title,content,file1, "
+    		+ " regdate,readcnt,grp,grplevel,grpstep) values "
+    		+ "( #{num},#{boardid},#{writer},#{pass},#{title},#{content}, "
+    		+ " #{fileurl},now(),0,#{grp},#{grplevel},#{grpstep})")
+	void insert(Board board);
+
+    @Update("update board "
+    		+ "set writer=#{writer},title=#{title}, "
+    		+ "content=#{content},file1=#{fileurl} "
+    		+ "where num=#{num}")
+	void update(Board board);
+    
+    
 	
 }

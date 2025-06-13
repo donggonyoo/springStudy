@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import kr.gdu.dao.mapper.BoardMapper;
 import kr.gdu.dto.board.BoardCountDto;
+import kr.gdu.dto.board.BoardDetailDto;
 import kr.gdu.logic.Board;
 
 @Repository
@@ -33,6 +34,25 @@ public class BoardDao {
 		param.put("searchtype",searchtype);
 		param.put("searchcontent",searchcontent);
 		return template.getMapper(cls).select(param);
+	}
+	public Board selectOne(int num) {
+		return template.getMapper(cls).selectOne(num);
+	}
+	public void addReadcnt(int num) {
+		template.getMapper(cls).addReadcnt(num);
+		
+	}
+	public int maxNum() {
+		return template.getMapper(cls).maxNum();
+	}
+	
+	public void insert(Board board) {
+		 template.getMapper(cls).insert(board);
+	}
+	
+	public void update(Board board) {
+		template.getMapper(cls).update(board);
+		
 	}
 	
 }

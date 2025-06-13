@@ -7,10 +7,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 
 import com.zaxxer.hikari.HikariDataSource;
+
+import kr.gdu.interceptor.BoardInterceptor;
 
 
 @Configuration //spring 환경설정
@@ -40,6 +43,17 @@ public class MvcConfig  implements WebMvcConfigurer{
 		return properties.initializeDataSourceBuilder()
 				.type(HikariDataSource.class).build(); //Connection Pool 객체
 	}
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(new BoardInterceptor())
+		.addPathPatterns("/board/write")
+		.addPathPatterns("/board/update")
+		.addPathPatterns("/board/delete"); 
+		//해당경로에접근하면 controller접근 전에 
+		//BoardInterceptor검증을 통과해야함
+		
+	}
+	
 	
 }
 

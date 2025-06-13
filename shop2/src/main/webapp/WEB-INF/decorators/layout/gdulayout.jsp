@@ -74,6 +74,7 @@
       <a class="navbar-brand" href="#">MyAdmin</a>
       <div class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="#">${loginUser.userid}님 하이</a></li>
           <li class="nav-item"><a class="nav-link" href="#">홈</a></li>
           <li class="nav-item"><a class="nav-link" href="#">설정</a></li>
           <li class="nav-item"><a class="nav-link" href="/user/logout">로그아웃</a></li>
