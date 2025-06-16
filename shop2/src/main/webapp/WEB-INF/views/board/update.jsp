@@ -8,6 +8,7 @@
 <meta charset="UTF-8">
 <title>게시글 수정</title>
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>
 <style type="text/css">
 textarea {
     resize: vertical;
@@ -47,7 +48,7 @@ textarea {
                     <tr class="border-b">
                         <td class="p-3 font-medium text-gray-600">내용</td>
                         <td class="p-3">
-                            <form:textarea path="content" rows="10" class="w-full p-2 border rounded focus:outline-none focus:ring-1 focus:ring-blue-400"/>
+                            <form:textarea path="content" rows="10" id="summernote" class="w-full p-2 border rounded focus:outline-none focus:ring-1 focus:ring-blue-400"/>
                             <div class="text-red-500 text-sm mt-1"><form:errors path="content"/></div>
                         </td>
                     </tr>
@@ -78,6 +79,38 @@ textarea {
 function file_delete(){
     document.f.fileurl.value="";
     file_desc.style.display = "none";
+}
+
+$(function() {
+	$("#summernote").summernote({
+		height : 300,
+		callbacks:{
+			onImageUpload:function(images){
+				for(let i=0;i<images.length;i++){
+					sendFile(images[i])
+				}
+			}
+		}
+	})
+})
+function sendFile(file){
+	//new FormData() : 파일업로드를 위한 데이터 컨테이너생성
+	let data = new FormData();
+	data.append("image",file); //컨테이너에 이미지객체 추가
+	$.ajax({ //ajax이용해 파일업로드
+		url:"/ajax/uploadImage", //요청URL(ajax컨트롤러)
+		type:"post",
+		data:data, //전송할 데이터:컨테이너
+		processData:false,
+		cache:false,
+		contentType:false,
+		success:function(src){
+			$("#summernote").summernote("insertImage",src);
+		},
+		error:function(e){ //서버응답오류
+			alert("이미지업로드실패 : "+e.status)
+		}			
+	})
 }
 </script>
 </body>

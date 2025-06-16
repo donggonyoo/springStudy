@@ -24,7 +24,10 @@ import kr.gdu.dto.board.BoardDetailDto;
 import kr.gdu.dto.board.DeleteBoardDto;
 import kr.gdu.exception.ShopException;
 import kr.gdu.logic.Board;
+import kr.gdu.logic.Comment;
 import kr.gdu.service.BoardService;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 @Controller
 @RequestMapping("board")
@@ -111,7 +114,7 @@ public class BoardController {
 	}
 	
 	@GetMapping("detail")
-	public String detailList(@RequestParam int num,Model model ) {
+	public String detail(@RequestParam int num,Model model ) {
 		Board board = service.getBoard(num);
 		service.addReadcnt(num);
 		
@@ -125,8 +128,18 @@ public class BoardController {
 		   case "2" -> boardName = "자유게시판"; 
 		   case "3" -> boardName = "QNA";
 		}
+		
+		
+		//댓글목록 화면에전달
+		List<Comment> commlist = service.commentList(num);
+		Comment comm = new Comment();
+		comm.setNum(num);
+		
 		model.addAttribute("board",board);
 		model.addAttribute("boardName",boardName);
+		model.addAttribute("commlist",commlist);
+		model.addAttribute("comment",comm);
+		
 		return "board/detail";
 	}
 	
@@ -159,6 +172,7 @@ public class BoardController {
 			mav.addObject("boardName","Q&A");
 		}
 		mav.addObject("num",num);
+		mav.addObject("boardid",boardid);
 		return mav;
 	}
 	
@@ -186,11 +200,10 @@ public class BoardController {
 	}
 	
 	@PostMapping("delete")
-	public String update( 
+	public String delete( 
 			@Valid @ModelAttribute DeleteBoardDto dto,BindingResult bresult,Model model) {
-		System.out.println("ksfjskfjskf : "+dto);
+		
 		Board dbBoard = service.getBoard(dto.getNum());
-		System.out.println("LLLLLLL"+dbBoard);
 		if(!dbBoard.getPass().equals(dto.getPass())) {
 			bresult.reject("error.dto.pass");
 			model.addAttribute("num",dto.getNum());
@@ -199,8 +212,81 @@ public class BoardController {
 		}
 		
 		service.boardDelete(dto);
-		return "redirect:list?boardid="+dbBoard.getBoardid();
+		return "redirect:list?boardid="+dbBoard.getBoardid();		
+	}
+	
+	
+	
+	@PostMapping("reply")
+	public String callReply(@Valid Board board, BindingResult bresult,Model model) {
+		System.out.println("board :: "+board);
+		String boardid = board.getBoardid();
+		int num = board.getNum();
+		if(bresult.hasErrors()) {
+			model.addAttribute("num",num);
+			model.addAttribute("boardid",boardid);
+			return "board/reply";	
+		}
+		try {
+			service.boardReply(board);
+			return "redirect:list?boardid="+boardid;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			model.addAttribute("num",num);
+			model.addAttribute("boardid",boardid);
+			String url = "board/reply";
+			throw new ShopException("오류발생", url);
+			}
+	}
+	
+	@PostMapping("comment")
+	public String comment(@Valid @ModelAttribute Comment comm,BindingResult bresult,Model model) {
+		if(bresult.hasErrors()) {
+			return commDetail(comm, model);
+		}
+		//comment테이블의 기본키값 , num,seq
+		int seq = service.comMaxSeq(comm.getNum());
+		comm.setSeq(++seq);
+		service.comInsert(comm);
+		return "redirect:detail?num="+comm.getNum()+"#comment";
+		//#comment : id속성값이 comment위치로 시작
+	}
+	
+	private String commDetail(Comment comm,Model model) {
+		int num = comm.getNum();
+		Board board = service.getBoard(num);		
+		String boardName = null;
+		String boardid = board.getBoardid();
+		if(boardid==null) {
+			boardid="1";
+		}
+		switch(board.getBoardid()) {		
+		   case "1" -> boardName = "공지사항";
+		   case "2" -> boardName = "자유게시판"; 
+		   case "3" -> boardName = "Q&A";
+		}	
+		//댓글목록 화면에전달
+		List<Comment> commlist = service.commentList(num);
+		comm.setNum(num);
 		
+		model.addAttribute("board",board);
+		model.addAttribute("boardName",boardName);
+		model.addAttribute("commlist",commlist);
+		model.addAttribute("comment",comm);
+		return "board/detail";
+	}
+	
+	@PostMapping("commdel")
+	public String comment(@ModelAttribute Comment comm,Model model) {
+		Comment dbComm = service.commSelectOne(comm.getNum(),comm.getSeq());
+		if(comm.getPass().equals(dbComm.getPass())) {
+			service.commDel(comm.getNum(),comm.getSeq());
+		}
+		else {
+			throw new ShopException("댓글삭제실패", "detail?num="+comm.getNum()+"#comment");
+		}
+		return "redirect:detail?num="+comm.getNum()+"#comment";
 	}
 	
 	

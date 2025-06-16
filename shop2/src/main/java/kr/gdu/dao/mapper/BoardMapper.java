@@ -15,6 +15,7 @@ import kr.gdu.dto.board.BoardCountDto;
 import kr.gdu.dto.board.BoardDetailDto;
 import kr.gdu.dto.board.DeleteBoardDto;
 import kr.gdu.logic.Board;
+import kr.gdu.logic.Comment;
 @Mapper
 public interface BoardMapper {
     String select = "select num,writer,pass,title,content,file1 AS fileurl,"
@@ -67,6 +68,12 @@ public interface BoardMapper {
 
     @Delete("delete from board where num=#{num}")
 	void delete(DeleteBoardDto dto);
+
+    @Update("update board set grpstep=grpstep+1 "
+    		+ " where grp=#{grp} and grpstep > #{grpstep}")
+	void grpStepAdd(Board board);
+
+   
     
     
 	

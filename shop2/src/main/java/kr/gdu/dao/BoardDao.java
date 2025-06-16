@@ -13,6 +13,7 @@ import kr.gdu.dto.board.BoardCountDto;
 import kr.gdu.dto.board.BoardDetailDto;
 import kr.gdu.dto.board.DeleteBoardDto;
 import kr.gdu.logic.Board;
+import kr.gdu.logic.Comment;
 
 @Repository
 public class BoardDao {
@@ -57,6 +58,10 @@ public class BoardDao {
 	}
 	public void delete(DeleteBoardDto dto) {
 		template.getMapper(cls).delete(dto);
+		
+	}
+	public void grpStepAdd(Board board) {
+		template.getMapper(cls).grpStepAdd(board);
 		
 	}
 	
