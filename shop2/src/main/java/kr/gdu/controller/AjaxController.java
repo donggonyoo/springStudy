@@ -2,6 +2,7 @@ package kr.gdu.controller;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import kr.gdu.logic.CompareValue;
 import kr.gdu.service.BoardService;
 /*
  * @Controller : @Component + Controller 기능
@@ -67,9 +69,8 @@ public class AjaxController {
 		for (Entry<String, Integer> m : map.entrySet()) {
 			list.add(m);			
 		}
-		
-		//value 크기별 정렬(내림차순)!!
-		Collections.sort(list,(m1,m2)->m2.getValue() - m1.getValue());
+		//value 크기별 정렬(내림차순)!!		
+		Collections.sort(list,(m1,m2)->m2.getValue() - m1.getValue());		
 		return list;
 	}
 	
