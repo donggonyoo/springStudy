@@ -85,8 +85,10 @@ textarea {
 			$("#summernote").summernote({
 				height : 300,
 				callbacks:{
+				//이미지업로드 이벤트발생 시 
 					onImageUpload:function(images){
 						for(let i=0;i<images.length;i++){
+						//이미지를 여러개선택했을 경우도 생각해 배열로설정
 							sendFile(images[i])
 						}
 					}

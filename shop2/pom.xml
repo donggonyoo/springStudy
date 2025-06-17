@@ -102,6 +102,13 @@
 			<artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
 		</dependency>
 
+		<!--jsoup설정-->
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.17.2</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.glassfish.web</groupId>
 			<artifactId>jakarta.servlet.jsp.jstl</artifactId>
@@ -112,11 +119,11 @@
 			<version>3.2.0-M2</version>
 		</dependency>
 		<!--StringUtils-->
-      <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>3.12.0</version> 
-      </dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.12.0</version>
+		</dependency>
 		<dependency>
 			<groupId>kr.gd</groupId>
 			<artifactId>shop1</artifactId>
@@ -152,5 +159,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>

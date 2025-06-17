@@ -1,6 +1,13 @@
 package kr.gdu.controller;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,4 +38,45 @@ public class AjaxController {
 		String imgUrl = service.summernoteImageUpload(multipartFile);
 		return imgUrl;		
 	}
+	
+	@RequestMapping(value="select1",produces = "text/plain; charset=UTF-8")
+	public String sidoSelect1(String si,String gu) {
+		return service.sidoSelect1(si,gu);
+	}
+	
+	@RequestMapping(value="select2")
+	public List<String> sigunSelect2(String si ,String gu) {
+		return service.sigunSelect2(si,gu); //list객체를 클라이언트로 전달
+	}
+	
+	@RequestMapping(value="exchange1",produces = "text/plain; charset=UTF-8")
+	public String exchange() {
+		//미국달러,중국,일본,유로 4개통화만		
+		return service.exchange1();
+	}
+	
+	@RequestMapping(value="exchange2")
+	public Map<String, Object> exchange2() { //json 데이터로 전송
+		return service.exchange2();
+	}
+	
+	@RequestMapping(value="graph1")
+	public List<Map.Entry<String, Integer>> graph1(String id) {
+		Map<String,Integer> map = service.graph1(id);
+		List<Map.Entry<String, Integer>> list = new ArrayList<>();
+		for (Entry<String, Integer> m : map.entrySet()) {
+			list.add(m);			
+		}
+		
+		//value 크기별 정렬(내림차순)!!
+		Collections.sort(list,(m1,m2)->m2.getValue() - m1.getValue());
+		return list;
+	}
+	
+	@RequestMapping(value="boardImg")
+	public Map<String, Object> boardImg() { 
+		return service.boardImg();
+	}
+	
+	
 }

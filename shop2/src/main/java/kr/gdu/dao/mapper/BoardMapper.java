@@ -73,6 +73,11 @@ public interface BoardMapper {
     		+ " where grp=#{grp} and grpstep > #{grpstep}")
 	void grpStepAdd(Board board);
 
+    @Select("select writer,count(*) cnt from board where boardid=#{val} "
+    		+ " group by writer order by cnt desc limit 0,7")
+    // 글 갯수 내림차순 정렬
+	List<Map<String, Object>> graph1(String id);
+
    
     
     
