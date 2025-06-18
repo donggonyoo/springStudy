@@ -1,5 +1,6 @@
 package kr.gdu.dao;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,9 @@ public class BoardDao {
 	}
 	public List<Map<String, Object>> graph1(String id) {		
 		return template.getMapper(cls).graph1(id);
+	}
+	public List<Map<Date, Object>> graph2(String id) {
+		return template.getMapper(cls).graph2(id);
 	}
 	
 }

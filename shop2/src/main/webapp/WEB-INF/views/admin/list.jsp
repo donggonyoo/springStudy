@@ -125,7 +125,7 @@
 <body>
     <div class="container">
         <h2>회원목록</h2>
-        <form action="mailForm" method="post">
+        <form action="mail">
             <table class="table">
                 <thead>
                     <tr>

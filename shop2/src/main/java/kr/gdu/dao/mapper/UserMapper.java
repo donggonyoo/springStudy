@@ -27,10 +27,16 @@ public interface UserMapper {
 	String selectUser(User user);
 	
 	@Select({"<script>",
-			"select * from useraccount ",
-			"<if test='userid != null'> where userid=#{userid}</if>",
-			"</script>"})
-	List<User> select(Map<String,Object> param);
+        "SELECT * FROM useraccount ",
+        "<if test='userid != null'> where userid=#{userid}</if> ",
+        "<if test='userids != null'>",
+        "WHERE userid IN ",
+        "<foreach item='id' collection='userids' open='(' separator=',' close=')'>",
+        "#{id}",
+        "</foreach>",
+        "</if>",
+        "</script>"})
+List<User> select(Map<String, Object> param);
 
 	
 	@Update("update useraccount set username=#{username}, "

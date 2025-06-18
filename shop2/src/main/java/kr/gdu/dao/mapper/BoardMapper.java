@@ -1,5 +1,6 @@
 package kr.gdu.dao.mapper;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -77,6 +78,10 @@ public interface BoardMapper {
     		+ " group by writer order by cnt desc limit 0,7")
     // 글 갯수 내림차순 정렬
 	List<Map<String, Object>> graph1(String id);
+
+    @Select("select date(regdate) reg ,count(*) cnt from board where boardid=#{val} "
+    		+ " group by date(regdate) order by cnt desc limit 0,7")
+	List<Map<Date, Object>> graph2(String id);
 
    
     

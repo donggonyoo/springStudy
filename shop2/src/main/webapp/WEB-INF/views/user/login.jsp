@@ -148,6 +148,8 @@
                 <input type="button" value="비밀번호찾기" onclick="win_open('pwSearch')" class="btn btn-secondary">
                 <input type="button" value="아이디찾기" onclick="win_open('idSearch')" class="btn btn-secondary">
             </div>
+            <a href="${apiURL}">
+            <img height="30" src="https://static.nid.naver.com/oauth/small_g_in.PNG"></a>
         </form:form>
     </div>
     <!-- Bootstrap JS and Popper.js CDN -->

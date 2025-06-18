@@ -31,149 +31,149 @@
 
 <style>
 body {
-    overflow-x: hidden;
+	overflow-x: hidden;
 }
 
 #exchange {
-    width: 95%;
-    margin: 6px auto;
-    overflow-x: hidden;
-    box-sizing: border-box;
+	width: 95%;
+	margin: 6px auto;
+	overflow-x: hidden;
+	box-sizing: border-box;
 }
 
 #exchange table {
-    width: 100%;
-    table-layout: fixed;
+	width: 100%;
+	table-layout: fixed;
 }
 
 #exchange table th, #exchange table td {
-    font-size: 0.85em;
-    padding: 0.3em;
-    word-wrap: break-word;
-    word-break: break-all;
-    vertical-align: middle;
+	font-size: 0.85em;
+	padding: 0.3em;
+	word-wrap: break-word;
+	word-break: break-all;
+	vertical-align: middle;
 }
 
 #exchange table th:first-child, #exchange table td:first-child {
-    width: 30%;
+	width: 30%;
 }
 
 .sidebar {
-    width: 250px;
-    transition: all 0.3s ease;
-    position: fixed;
-    top: 56px;
-    bottom: 0;
-    left: 0;
-    background-color: #f8f9fa;
-    overflow-y: auto;
-    z-index: 1000;
+	width: 250px;
+	transition: all 0.3s ease;
+	position: fixed;
+	top: 56px;
+	bottom: 0;
+	left: 0;
+	background-color: #f8f9fa;
+	overflow-y: auto;
+	z-index: 1000;
 }
 
 .sidebar.collapsed {
-    width: 80px;
+	width: 80px;
 }
 
 .main-content {
-    margin-left: 250px;
-    transition: all 0.3s ease;
-    padding: 1.5rem;
-    margin-top: 56px;
-    position: relative;
-    max-width: 100%; /* 화면 너비 초과 방지 */
-    min-height: 100vh; /* 최소 높이를 뷰포트 높이로 설정 */
-    box-sizing: border-box;
+	margin-left: 250px;
+	transition: all 0.3s ease;
+	padding: 1.5rem;
+	margin-top: 56px;
+	position: relative;
+	max-width: 100%; /* 화면 너비 초과 방지 */
+	min-height: 100vh; /* 최소 높이를 뷰포트 높이로 설정 */
+	box-sizing: border-box;
 }
 
 .main-content::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url('/board/image/sasasasa.jpg'); /* 실제 이미지 경로로 변경 */
-    background-size: contain; /* 이미지가 컨테이너 안에 맞게 비율 유지 */
-    background-repeat: no-repeat; /* 이미지 반복 방지 */
-   background-position: 20% 50%; /* 이미지를 왼쪽으로 이동 (20% 왼쪽, 50% 수직 중앙) */
-    opacity: 0.8; /* 투명도 유지 */
-    z-index: -1; /* 콘텐츠 뒤로 배치 */
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-image: url('/board/image/seolseol.png'); /* 실제 이미지 경로로 변경 */
+	background-size: contain; /* 이미지가 컨테이너 안에 맞게 비율 유지 */
+	background-repeat: no-repeat; /* 이미지 반복 방지 */
+	background-position: 20% 50%; /* 이미지를 왼쪽으로 이동 (20% 왼쪽, 50% 수직 중앙) */
+	opacity: 0.8; /* 투명도 유지 */
+	z-index: -1; /* 콘텐츠 뒤로 배치 */
 }
 
 .main-content.collapsed {
-    margin-left: 80px;
+	margin-left: 80px;
 }
 
 .sidebar .list-group-item {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .footer {
-    text-align: center;
-    padding: 1rem;
-    border-top: 1px solid #dee2e6;
-    margin-top: 2rem;
+	text-align: center;
+	padding: 1rem;
+	border-top: 1px solid #dee2e6;
+	margin-top: 2rem;
 }
 
 /* Enhanced styles for radio buttons */
-.radio-toggle {
-    margin-bottom: 1.5rem;
-}
-
+/* Enhanced styles for radio buttons */
 .radio-toggle .btn {
-    border-radius: 0.25rem;
-    padding: 0.5rem 1.5rem;
-    font-size: 1rem;
-    border: 1px solid #6c757d;
-    background-color: #ffffff;
-    color: #212529;
-    transition: all 0.2s ease;
+   border-radius: 0.25rem;
+   padding: 0.5rem 1.5rem;
+   font-size: 1rem;
+   border: 1px solid #6c757d; /* Gray border for inactive state */
+   background-color: #ffffff; /* White background for inactive state */
+   color: #212529; /* Dark text for inactive state */
+   transition: all 0.2s ease;
 }
 
 .radio-toggle .btn input[type="radio"] {
-    display: none;
+   display: none;
 }
 
 .radio-toggle .btn.active {
-    background-color: #007bff;
-    color: #ffffff;
-    border-color: #007bff;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+   background-color: #007bff; /* Blue background for active state */
+   color: #ffffff; /* White text for active state */
+   border-color: #007bff; /* Matching border */
+   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Subtle glow effect */
 }
 
 .radio-toggle .btn:hover:not(.active) {
-    background-color: #e7f1ff;
-    border-color: #0056b3;
-    color: #0056b3;
+   background-color: #e7f1ff; /* Light blue hover background */
+   border-color: #0056b3; /* Darker border on hover */
+   color: #0056b3; /* Darker text on hover */
 }
 
 .radio-toggle .btn:focus {
-    outline: none;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+   outline: none;
+   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Focus ring */
 }
 
-#piecontainer {
-    width: 100%;
-    height: 250px;
-    border: 1px solid #dee2e6;
-    border-radius: 0.25rem;
-    padding: 0.5rem;
-    box-sizing: border-box;
-    background-color: rgba(255, 255, 255, 0.9); /* 차트 가독성 유지 */
+/* 차트 컨테이너를 가로로 배치하기 위한 스타일 */
+.chart-wrapper {
+    display: flex;
+    /* flex-wrap: wrap; -> 모바일 반응형 제거로 인해 불필요 */
+    justify-content: space-around; /* 항목들 사이에 공간을 균등하게 분배 */
+    gap: 20px; /* 차트 사이에 간격 추가 */
+    margin-bottom: 2rem; /* 하단 여백 추가 */
 }
 
-/* 반응형 디자인: 모바일 화면에서 배경 이미지 조정 */
-@media (max-width: 768px) {
-    .main-content {
-        margin-left: 0; /* 사이드바가 접히거나 없어질 경우 */
-        padding: 1rem;
-    }
-    .main-content::before {
-        background-size: contain; /* 모바일에서도 비율 유지 */
-        background-position: center top; /* 모바일에서 상단 중앙 정렬 */
-    }
+/* 개별 radio-toggle div의 너비를 조정하여 차트가 나란히 놓일 공간 확보 */
+.chart-wrapper > .radio-toggle {
+    width: 48%; /* 두 개의 차트가 한 줄에 들어가도록 너비 조정 */
+    /* 기존 radio-toggle에 있던 margin-bottom은 chart-wrapper의 gap으로 대체 */
+    margin-bottom: 0;
+}
+
+#piecontainer, #barcontainer {
+   width: 100%; /* 부모 .radio-toggle에 48%를 줬으므로 여기서는 100%로 채움 */
+   height: 250px; /* 명시적으로 높이 설정 */
+   border: 1px solid #dee2e6;
+   border-radius: 0.25rem;
+   padding: 0.5rem;
+   box-sizing: border-box;
 }
 </style>
 
@@ -210,6 +210,8 @@ body {
 				href="/board/list?boardid=3"
 				class="list-group-item list-group-item-action">❓ Q&A</a> <a href="#"
 				class="list-group-item list-group-item-action">⚙️ 설정</a>
+				<a href="/chat/chat"
+				class="list-group-item list-group-item-action">&#x1F917; 채팅</a>
 		</div>
 		<%--수출입은행 환율정보표시영역 --%>
 		<div style="width: 100%">
@@ -218,37 +220,50 @@ body {
 	</div>
 
 	<div id="mainContent" class="main-content">
-		<div class="radio-toggle">			
-			<div class="btn-group" role="group" aria-label="Pie chart selection">
-				<label class="btn btn-outline-primary active"> <input
-					type="radio" name="pie" onchange="piegraph(2)" checked>
-					자유게시판
-				</label> <label class="btn btn-outline-primary"> <input type="radio"
-					name="pie" onchange="piegraph(3)"> Q&A
-				</label>
-			</div>
-			<div id="piecontainer" style="width: 100%; height: 250px;"></div>
-		</div>
+		<div class="chart-wrapper">
+          <div class="radio-toggle">
+             <div class="btn-group" role="group" aria-label="Pie chart selection">
+                <label class="btn btn-outline-primary active"> <input
+                   type="radio" name="pie" onchange="piegraph(2)" checked>
+                   자유게시판
+                </label> <label class="btn btn-outline-primary"> <input type="radio"
+                   name="pie" onchange="piegraph(3)"> Q&A
+                </label>
+             </div>
+             <div id="piecontainer"></div>
+          </div>
+          <div class="radio-toggle">
+             <div class="btn-group" role="group" aria-label="Pie chart selection">
+                <label class="btn btn-outline-primary active"> <input
+                   type="radio" name="barline" onchange="barlinegraph(2)" checked>
+                   자유게시판
+                </label> <label class="btn btn-outline-primary"> <input type="radio"
+                   name="barline" onchange="barlinegraph(3)"> Q&A
+                </label>
+             </div>
+             <div id="barcontainer"></div>
+          </div>
+      </div>
 		<sitemesh:write property="body" />
 	</div>
 
 	<footer class="footer text-muted">
-	<div id="boardImg"></div>
-	<hr>
-	<div class="d-flex justify-content-center gap-2 mt-3">
-	© 2025 MyAdmin. All <span id="si"> <select name="si"
-			onchange="getText('si')">
-				<option value="">시도를 선택하세요</option>
-		</select>
-		</span> <span id="gu"> <select name="gu" onchange="getText('gu')">
-				<option value="">구군을 선택하세요</option>
-		</select>
-		</span> <span id="dong"> <select name="dong">
-				<option value="">동리를 선택하세요</option>
-		</select>
-		</span>
-	</div>
-		
+		<div id="boardImg"></div>
+		<hr>
+		<div class="d-flex justify-content-center gap-2 mt-3">
+			© 2025 MyAdmin. All <span id="si"> <select name="si"
+				onchange="getText('si')">
+					<option value="">시도를 선택하세요</option>
+			</select>
+			</span> <span id="gu"> <select name="gu" onchange="getText('gu')">
+					<option value="">구군을 선택하세요</option>
+			</select>
+			</span> <span id="dong"> <select name="dong">
+					<option value="">동리를 선택하세요</option>
+			</select>
+			</span>
+		</div>
+
 	</footer>
 
 	<script
@@ -400,7 +415,7 @@ body {
       $.ajax("/ajax/graph1?id="+id,{
          success : function(json){
             // 캔버스 생성 시 높이 속성 추가
-            let canvas = "<canvas id='canvas1' style='width:100%; height:100px;'></canvas>"; // 캔버스 높이 직접 지정 (예: 100px)
+            let canvas = "<canvas id='canvas1' style='width:100%; height:100%;'></canvas>"; // 캔버스 높이 직접 지정 (예: 100px)
             $("#piecontainer").html(canvas);
             pieGraphPrint(json,id);
          },
@@ -411,14 +426,15 @@ body {
     }
     
     function pieGraphPrint(arr,id){
+//arr : [{장원영:10},{안유진:20},....]
       let colors = [];
       let writers = [];
       let datas = [];
       $.each(arr,function(index){
          colors[index] = randomColor(0.5);
          for(key in arr[index]){
-            writers.push(key);
-            datas.push(arr[index][key]);
+            writers.push(key); // key값(writer)
+            datas.push(arr[index][key]); //각map의 value(cnt)
          }
       })
       let title = (id == 2)?"자유게시판":"Q&A";
@@ -463,6 +479,84 @@ body {
       }
       let ctx = document.getElementById("canvas1")
       new Chart(ctx,config)      
+    }
+    
+    
+    function barlinegraph(id){
+        $.ajax("/ajax/graph2?id="+id,{
+           success : function(arr){
+              // 캔버스 생성 시 높이 속성 추가
+              let canvas = "<canvas id='canvas2' style='width:100%; height:100%;'></canvas>"; // 캔버스 높이 직접 지정 (예: 100px)
+              $("#barcontainer").html(canvas);
+              barlinGraphPrint(arr,id);
+           },
+           error : function(e){
+              alert("서버오류 : "+e.status);
+           }
+        })
+      }
+    
+    function barlinGraphPrint(arr,id){
+    	let colors = [];
+        let regdates = [];
+        let datas = [];
+        $.each(arr,function(index){
+			colors[index] = randomColor(0.5)
+			for(key in arr[index]){
+				regdates.push(key);
+				datas.push(arr[index][key])
+			}
+        })
+			let title = (id==2)?"자유게시판":"Q&A";
+			let config = {
+				type:'bar',
+				data:{
+					datasets:[
+						{
+							type:"line",
+							borderWidth:2,
+							borderColor:colors,
+							label:'건수',
+							fill:false,
+							data:datas
+						},
+						{
+							type:"bar",
+							backgroundColor:colors,
+							label : '건수',
+							data : datas
+						}
+					],
+					labels : regdates,
+				},
+				options : {
+					responsive : true,
+					legend : {display:false},
+					title:{
+						display :true,
+						text : '최근7일'+title+"등록건수",
+						position : 'bottom'
+					},
+					scales:{
+						xAxes : [{ display : true,
+							scaleLabel : {
+								display : true,
+								labelString : "작성일자"
+							}
+						}],
+						yAxes : [{
+							scaleLabel : {
+								display : true,
+								labelString : "게시물 등록 건수"
+							},
+							ticks : {begenAtZero : true}
+						}]
+						
+					}
+				}
+			}
+			let ctx = document.getElementById("canvas2")
+			new Chart(ctx,config)
     }
   </script>
 </body>

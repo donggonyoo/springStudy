@@ -4,7 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -353,7 +356,7 @@ public class BoardService {
 			doc = Jsoup.connect(url).get();
 			Elements el = doc.select("img.scroll_logo");
 			System.out.println("el : "+el);
-			imgSrc = el.first().attr("src");
+			imgSrc = el.first().attr("src"); //el의  src 내용(최초 1개)만 뽑음
 			System.out.println("imgSrc :: "+imgSrc);
 			
 		}
@@ -363,6 +366,20 @@ public class BoardService {
 		
 		HashMap<String, Object> map = new HashMap<>();
 		map.put("img", imgSrc);
+		return map;
+	}
+	public Map<String, Integer> graph2(String id) {
+		List<Map<Date,Object>> list = boardDao.graph2(id);
+		Map<String,Integer> map = new HashMap<>();
+		for (Map<Date, Object> m : list) {
+			Date date = (Date)m.get("reg");
+			SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
+			String regdate = sdf.format(date);
+			long cnt = (Long)m.get("cnt");
+			map.put(regdate, (int)cnt);
+		}
+		System.out.println("map ::: "+map);
+		
 		return map;
 	}
 }
