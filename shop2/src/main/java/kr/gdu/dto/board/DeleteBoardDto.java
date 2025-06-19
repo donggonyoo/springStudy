@@ -7,7 +7,7 @@ import lombok.Data;
 public class DeleteBoardDto {
 	
 	private int num;
-	@NotEmpty(message="싫어")
+	@NotEmpty(message="비밀번호를 입력해")
 	private String pass;
 	private String boardid;
 

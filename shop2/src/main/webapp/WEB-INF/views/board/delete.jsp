@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
     <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
+    <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
     <title>게시판 삭제 화면</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -58,7 +59,7 @@
                 ${boardName} 글 삭제
             </div>
             <div class="card-body">
-                <form action="delete" method="post" name="f">
+                <form:form modelAttribute="deleteBoardDto" action="delete">
                 <!-- 객체의 이름 : deleteBoardDto(@Valid DeleteBoardDto dto)  -->
                     <spring:hasBindErrors name="deleteBoardDto">
                         <div class="error-message">
@@ -71,12 +72,21 @@
                     <input type="hidden" name="boardid" value="${param.boardid}">
                     <div class="mb-3">
                         <label for="pass" class="form-label">게시글 비밀번호</label>
-                        <input type="password" name="pass" class="form-control" id="pass" placeholder="비밀번호를 입력하세요" required>
+                        <input type="password" name="pass" class="form-control" id="pass" onkeyup="delError()" placeholder="비밀번호를 입력하세요">
+                        <div class="error-message"><form:errors path="pass" id="err"/></div>
                     </div>
                     <button type="submit" class="btn btn-primary">게시글 삭제</button>
-                </form>
+                </form:form>
             </div>
         </div>
     </div>
+    <script type="text/javascript">
+    	function delError(){
+			const err = document.querySelector(".error-message");
+			const passError = document.querySelector("#err");
+			err.style.display = 'none';
+			passError.style.display='none';
+    	}
+    </script>
 </body>
 </html>

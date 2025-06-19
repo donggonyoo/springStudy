@@ -1,11 +1,9 @@
 package kr.gdu.controller;
 
 import java.util.List;
-
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -20,13 +18,11 @@ import org.springframework.web.servlet.ModelAndView;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import kr.gdu.dto.board.BoardDetailDto;
 import kr.gdu.dto.board.DeleteBoardDto;
 import kr.gdu.exception.ShopException;
 import kr.gdu.logic.Board;
 import kr.gdu.logic.Comment;
 import kr.gdu.service.BoardService;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
 @Controller
@@ -202,6 +198,12 @@ public class BoardController {
 	@PostMapping("delete")
 	public String delete( 
 			@Valid @ModelAttribute DeleteBoardDto dto,BindingResult bresult,Model model) {
+		
+		if(bresult.hasErrors()) {
+			model.addAttribute("num",dto.getNum());
+			model.addAttribute("boardid",dto.getBoardid());
+			return "board/delete";
+		}
 		
 		Board dbBoard = service.getBoard(dto.getNum());
 		if(!dbBoard.getPass().equals(dto.getPass())) {
