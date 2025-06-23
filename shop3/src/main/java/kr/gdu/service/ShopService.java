@@ -10,13 +10,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import kr.gdu.logic.Item;
 import kr.gdu.repository.ItemRepository;
 
 @Service
 public class ShopService {
 	@Autowired
-	private ItemRepository itemDao;
+	private ItemRepository itemRepository;
 
 	/*@Autowired
 	private ItemDao itemDao;
@@ -29,29 +30,28 @@ public class ShopService {
 	*/
 
 	public List<Item> itemList() {
-		return itemDao.findAll();
+		return itemRepository.findAll();
 	}
 	
-	/*public Item getItem(Integer id) {
-		return itemDao.getItem(id);
+	public Item getItem(Integer id) {
+		return itemRepository.findById(id).get(); //id(기본키를 이용해 객체를얻어옴
 	}
 
-	public void itemCreate(Item item, HttpServletRequest request) {
-
+	public void itemCreate(@Valid Item item, HttpServletRequest request) {
 		//업로드파일이 존재 시 
-		if(item.getPicture() != null && !item.getPicture().isEmpty()) {
-			//프로젝트의 webapp하위의 img폴더 하위에 저장
-			String path =request.getServletContext().getRealPath("/")+"img/";
-			uploadFileCreate(item.getPicture(),path);//폴더에업로드
-			item.setPictureUrl(item.getPicture().getOriginalFilename());
-		}
+				if(item.getPicture() != null && !item.getPicture().isEmpty()) {
+					//프로젝트의 webapp하위의 img폴더 하위에 저장
+					String path =request.getServletContext().getRealPath("/")+"img/";
+					uploadFileCreate(item.getPicture(),path);//폴더에업로드
+					item.setPictureUrl(item.getPicture().getOriginalFilename());
+				}
 
-		int maxid = itemDao.maxId();
-		item.setId(maxid+1); //현재 최대 id에 +1을 해준다.
-		itemDao.insert(item);
+				int maxid = itemRepository.findMaxId();
+				item.setId(maxid+1); //현재 최대 id에 +1을 해준다.
+				itemRepository.save(item); //insert,update기능을 하는 repository의 메서드
+		
 	}
-
-
+	
 	private void uploadFileCreate(MultipartFile picture, String path) {
 		String orgFile = picture.getOriginalFilename();//업로드된 파일명
 		File f = new File(path);
@@ -66,7 +66,25 @@ public class ShopService {
 			e.printStackTrace();
 		}
 	}
+	
+	public void itemUpdate(Item item, HttpServletRequest request) {
+		//업로드파일이 존재 시 
+		if(item.getPicture() != null && !item.getPicture().isEmpty()) {
+			//프로젝트의 img폴더 하위에 저장
+			String path =request.getServletContext().getRealPath("/")+"img/";
+			uploadFileCreate(item.getPicture(),path);//폴더에업로드
+			item.setPictureUrl(item.getPicture().getOriginalFilename());
+		}
+		itemRepository.save(item);
+	}
 
+	public void deleteItem(Integer id) {
+		itemRepository.deleteById(id);
+		
+	}
+	
+	
+	/*
 	public void itemUpdate(Item item, HttpServletRequest request) {
 		//업로드파일이 존재 시 
 		if(item.getPicture() != null && !item.getPicture().isEmpty()) {

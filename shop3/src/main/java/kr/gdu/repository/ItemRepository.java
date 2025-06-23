@@ -3,7 +3,8 @@
 	import java.util.List;
 	
 	import org.springframework.data.jpa.repository.JpaRepository;
-	import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 	
 	import kr.gdu.logic.Item;
 	
@@ -12,4 +13,10 @@
 	@Repository
 	public interface ItemRepository extends JpaRepository<Item, Integer> {
 		List<Item> findAll(); //전체데이터조회
+
+		//coalesce(JPA)  == ifnull(MySQL)
+		@Query("select coalesce(max(i.id),0) from Item i ")
+		int findMaxId();
+
+		
 	}

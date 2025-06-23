@@ -35,6 +35,55 @@ public class ItemController {
 		model.addAttribute("itemList",itemList);
 		return "item/list";
 	}
+	@GetMapping({"detail","update","delete"})
+	public ModelAndView getMap(@RequestParam Integer id) {
+		ModelAndView mav = new ModelAndView();
+		Item item = service.getItem(id);
+		mav.addObject("item",item);
+		return mav;
+	}
+	
+	@GetMapping("create") //GET방식
+	public ModelAndView create() {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject(new Item());
+		return mav;
+	}
+	
+	@PostMapping("create")
+	//valid : 유효성검사
+	//BindingResult : error를 담고있는 객체
+	public ModelAndView register(@Valid Item item, BindingResult bresult,
+			HttpServletRequest request) {
+		ModelAndView mav = new ModelAndView();
+		if(bresult.hasErrors()) { //입력값 검증 오류발생 시 
+			return mav;
+		}
+		//정상인경우
+		service.itemCreate(item,request);//DB등록 + 이미지파일업로드
+		mav.setViewName("redirect:list"); //list 재요청
+		return mav;
+	}
+	
+	@PostMapping("update")
+	public ModelAndView postUpdate(@Valid Item item, BindingResult bresult,HttpServletRequest request) {
+		ModelAndView mav = new ModelAndView();
+		if(bresult.hasErrors()) {
+			return mav;
+		}
+		service.itemUpdate(item,request);
+		mav.setViewName("redirect:list"); //list 재요청
+		return mav;
+	}
+	
+	@PostMapping("delete")
+	public ModelAndView postDelete(@RequestParam Integer id) {
+		ModelAndView mav = new ModelAndView();
+		service.deleteItem(id);
+		mav.setViewName("redirect:list"); //list 재요청
+		return mav;
+	}
+	
 	
 	/*
 	//detail,update는 get방식일때 똑같은 메서드를 사용함
@@ -95,13 +144,7 @@ public class ItemController {
 		return mav;
 	}
 	
-	@PostMapping("delete")
-	public ModelAndView postDelete(@RequestParam Integer id) {
-		ModelAndView mav = new ModelAndView();
-		service.deleteItem(id);
-		mav.setViewName("redirect:list"); //list 재요청
-		return mav;
-	}
+	
 	*/
 
 }
