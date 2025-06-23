@@ -6,19 +6,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import kr.gdu.controller.ItemController;
 import kr.gdu.logic.Item;
 import kr.gdu.repository.ItemRepository;
 
 @Service
 public class ShopService {
+
 	@Autowired
 	private ItemRepository itemRepository;
 
+
+	@Value("${RESOURCE_DIR}")
+	private String RESOURCE_DIR;
 	/*@Autowired
 	private ItemDao itemDao;
 	@Autowired
@@ -41,7 +47,8 @@ public class ShopService {
 		//업로드파일이 존재 시 
 				if(item.getPicture() != null && !item.getPicture().isEmpty()) {
 					//프로젝트의 webapp하위의 img폴더 하위에 저장
-					String path =request.getServletContext().getRealPath("/")+"img/";
+					//String path =request.getServletContext().getRealPath("/")+"img/";
+					String path = RESOURCE_DIR+"img/";
 					uploadFileCreate(item.getPicture(),path);//폴더에업로드
 					item.setPictureUrl(item.getPicture().getOriginalFilename());
 				}
@@ -54,6 +61,7 @@ public class ShopService {
 	
 	private void uploadFileCreate(MultipartFile picture, String path) {
 		String orgFile = picture.getOriginalFilename();//업로드된 파일명
+		System.out.println("path :: "+path);
 		File f = new File(path);
 		if(!f.exists()) {
 			f.mkdirs();
@@ -71,7 +79,9 @@ public class ShopService {
 		//업로드파일이 존재 시 
 		if(item.getPicture() != null && !item.getPicture().isEmpty()) {
 			//프로젝트의 img폴더 하위에 저장
-			String path =request.getServletContext().getRealPath("/")+"img/";
+			//String path =request.getServletContext().getRealPath("/")+"img/";
+			String path = RESOURCE_DIR+"img/";
+			
 			uploadFileCreate(item.getPicture(),path);//폴더에업로드
 			item.setPictureUrl(item.getPicture().getOriginalFilename());
 		}
