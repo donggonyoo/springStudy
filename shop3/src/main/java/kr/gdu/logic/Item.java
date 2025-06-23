@@ -35,6 +35,7 @@ public class Item {
 	private String description;
 	
 	private String pictureUrl;
+	//다음과같이 낙타표기법을 사용하면 picture_url 로 컬럼이만들어짐
 	
 	@Transient //DB에 반영되지않는다.(컬럼과 무관)
 	private MultipartFile picture;

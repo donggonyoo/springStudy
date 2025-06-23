@@ -1,61 +1,70 @@
 package kr.gdu.service;
 
 import java.io.File;
-
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import kr.gdu.controller.ItemController;
 import kr.gdu.logic.Item;
 import kr.gdu.repository.ItemRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Service
+@Log4j2 //에러로그등을 찍어줌
+@RequiredArgsConstructor //final로 설정된 객체를 자동으로 생성자로설정하므로써 싱글톤방식도 지킴
 public class ShopService {
 
-	@Autowired
-	private ItemRepository itemRepository;
+	
+	private final ItemRepository itemRepository;
 
-
-	@Value("${RESOURCE_DIR}")
+	//사진저장을 하기위한 경로 저장하고있음(application.properties)
+	@Value("${RESOURCE_DIR}") 
 	private String RESOURCE_DIR;
-	/*@Autowired
-	private ItemDao itemDao;
-	@Autowired
-	private SaleDao saleDao;
-	@Autowired
-	private SaleItemDao saleItemDao;
-	@Autowired
-	private ExchangeDao exDao;
-	*/
+
 
 	public List<Item> itemList() {
-		return itemRepository.findAll();
+		//repository인터페이스가 JpaRepository<Item, Integer>을 상속받아 특정메서드들 사용가능
+		//findAll : 모든데이터조회
+		return itemRepository.findAll(); 
 	}
 	
 	public Item getItem(Integer id) {
-		return itemRepository.findById(id).get(); //id(기본키를 이용해 객체를얻어옴
+		//id로 item객체를 조회해 반환 . 
+		//null일 수도 있으므로 Optional로 감싸져있다
+		 Optional<Item> itemOption = itemRepository.findById(id);
+		 if(itemOption.get()==null) {
+			 System.out.println("존재하지않는 id");
+			 return null;
+		 }
+		 else {
+			 return itemOption.get();
+		 }		
 	}
 
 	public void itemCreate(@Valid Item item, HttpServletRequest request) {
 		//업로드파일이 존재 시 
 				if(item.getPicture() != null && !item.getPicture().isEmpty()) {
-					//프로젝트의 webapp하위의 img폴더 하위에 저장
-					//String path =request.getServletContext().getRealPath("/")+"img/";
-					String path = RESOURCE_DIR+"img/";
+					//resource_dir의 경로를 application에 가서 확인해보자.
+					String path = RESOURCE_DIR+"img/"; 
 					uploadFileCreate(item.getPicture(),path);//폴더에업로드
 					item.setPictureUrl(item.getPicture().getOriginalFilename());
 				}
 
 				int maxid = itemRepository.findMaxId();
-				item.setId(maxid+1); //현재 최대 id에 +1을 해준다.
-				itemRepository.save(item); //insert,update기능을 하는 repository의 메서드
+				item.setId(maxid+1); 
+				
+				
+				// 해당 ID가 DB에 존재한다면 -> UPDATE
+				// 존재하지 않으면 -> INSERT
+				//item 객체에 @Id 필드가 반드시 있어야 JPA가 새로 추가할지 수정할지 판단할 수 있습니다.
+				itemRepository.save(item);
 		
 	}
 	
@@ -75,22 +84,40 @@ public class ShopService {
 		}
 	}
 	
+	@Transactional
 	public void itemUpdate(Item item, HttpServletRequest request) {
 		//업로드파일이 존재 시 
 		if(item.getPicture() != null && !item.getPicture().isEmpty()) {
 			//프로젝트의 img폴더 하위에 저장
 			//String path =request.getServletContext().getRealPath("/")+"img/";
-			String path = RESOURCE_DIR+"img/";
-			
+			String path = RESOURCE_DIR+"img/";		
 			uploadFileCreate(item.getPicture(),path);//폴더에업로드
 			item.setPictureUrl(item.getPicture().getOriginalFilename());
 		}
-		itemRepository.save(item);
+		//saveAndFlush : 즉시반영(굳이필요하진않음)
+		//save : 지연반영
+		try {
+			itemRepository.save(item);	
+		}
+		catch (Exception e) {
+			log.error("update시 오류발생"+e);
+			throw new RuntimeException("업데이트 중 오류가 발생했습니다.", e);
+		}
+		
 	}
 
+	@Transactional
 	public void deleteItem(Integer id) {
-		itemRepository.deleteById(id);
-		
+		try {
+			itemRepository.deleteById(id);
+			//JpaRepository<Item, Integer>을 상속받아서 존재하는 메서드임 !!!
+			//id를 이용해 entity(객체)를 삭제함	
+		}
+		catch (Exception e) {
+			log.error("delete시 오류 발생"+e);
+			throw new RuntimeException("아이템 삭제 중 오류가 발생했습니다.", e);
+		}
+			
 	}
 	
 	
