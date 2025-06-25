@@ -204,10 +204,18 @@ public class CipherUtil {
     }
 
     public static String makehash(String userid) throws Exception {
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] plain = userid.getBytes();
-        byte[] hash = md.digest(plain);
-        return byteToHex(hash);
+        try{
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] plain = userid.getBytes();
+            byte[] hash = md.digest(plain);
+            return byteToHex(hash);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+
+
     }
 
 

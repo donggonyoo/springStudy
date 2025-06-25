@@ -19,7 +19,6 @@ import lombok.ToString;
 @Setter
 @ToString
 public class UserDto {
-	@Id
 	@Size(min = 3,max = 10, message = "아이디는 3자이상 10자 이하로 입력하세요")
 	private String userid;
 	private String channel;

@@ -1,13 +1,19 @@
 package gradleProject.shop3.controller;
 
+import gradleProject.shop3.domain.Sale;
+import gradleProject.shop3.domain.SaleItem;
 import gradleProject.shop3.domain.User;
 import gradleProject.shop3.dto.UserDto;
+import gradleProject.shop3.exception.ShopException;
 import gradleProject.shop3.mapper.UserMapper;
+import gradleProject.shop3.service.ShopService;
 import gradleProject.shop3.service.UserService;
 import gradleProject.shop3.util.CipherUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
@@ -17,23 +23,30 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.security.SecureRandom;
+import java.util.List;
 
 @Controller
 @RequestMapping("user")
 public class UserController {
 
-	@Autowired
-	private UserService service;
+    @Autowired
+    private UserService service;
 
+    @Autowired
+    private UserMapper userMapper;
 	@Autowired
-	private UserMapper userMapper;
-//
-//	@Autowired
-//	private ShopService shopService;
+	private ShopService shopService;
 
-	// BoardController 의존성 제거 (필요 없는 경우)
+    // BoardController 의존성 제거 (필요 없는 경우)
     /*
     private final BoardController boardController;
     UserController(BoardController boardController) {
@@ -41,120 +54,271 @@ public class UserController {
     }
     */
 
-	@GetMapping("*") // GET 방식 모든 요청시 호출 (회원가입/로그인 폼 등)
-	public String form(Model model, HttpSession session, HttpServletRequest request) {
-		User loginUser = (User) session.getAttribute("loginUser");
+    @GetMapping("*") // GET 방식 모든 요청시 호출 (회원가입/로그인 폼 등)
+    public String form(Model model, HttpSession session, HttpServletRequest request) {
+        User loginUser = (User) session.getAttribute("loginUser");
 
-		// 로그인 상태인 경우 마이페이지로 리다이렉트
-		if (loginUser != null && StringUtils.hasText(loginUser.getUserid())) {
-			return "redirect:/user/mypage?userid=" + loginUser.getUserid();
-		}
+        // 로그인 상태인 경우 마이페이지로 리다이렉트
+        if (loginUser != null && StringUtils.hasText(loginUser.getUserid())) {
+            return "redirect:/user/mypage?userid=" + loginUser.getUserid();
+        }
 
-		// 현재 요청 경로에 따라 적절한 뷰 설정 (더 명확하게 분리하는 것이 좋음)
-		// 예를 들어, /user/join 요청은 user/join 뷰, /user/login 요청은 user/login 뷰
-		String requestURI = request.getRequestURI();
-		if (requestURI.endsWith("/user/join")) {
-			model.addAttribute("user", new User()); // 폼 바인딩용 User 객체
-			model.addAttribute("title", "회원가입");
-			return "user/join";
-		} else if (requestURI.endsWith("/user/login")) {
-			model.addAttribute("user", new User()); // 폼 바인딩용 User 객체
-			model.addAttribute("title", "로그인");
+        // 현재 요청 경로에 따라 적절한 뷰 설정 (더 명확하게 분리하는 것이 좋음)
+        // 예를 들어, /user/join 요청은 user/join 뷰, /user/login 요청은 user/login 뷰
+        String requestURI = request.getRequestURI();
+        if (requestURI.endsWith("/user/join")) {
+            model.addAttribute("user", new User()); // 폼 바인딩용 User 객체
+            model.addAttribute("title", "회원가입");
+            return "user/join";
+        } else if (requestURI.endsWith("/user/login")) {
+            model.addAttribute("user", new User()); // 폼 바인딩용 User 객체
+            model.addAttribute("title", "로그인");
+            return "user/login";
+        } else {
+            // 그 외의 * 요청에 대한 기본 처리
+            model.addAttribute("user", new User());
+            model.addAttribute("title", "회원가입"); // 기본적으로 회원가입 폼을 보여주는 것으로 가정
+            return "user/join";
+        }
+    }
+
+    @PostMapping("join")
+    public String userAdd(@Valid UserDto userDto, BindingResult bresult, Model model) {
+        model.addAttribute("title", "회원가입"); // 페이지 제목 설정
+
+        if (bresult.hasErrors()) {
+            bresult.reject("error.input.user", "입력 값을 확인해 주세요."); // 전반적인 입력 오류
+            return "user/join"; // 오류 발생 시 다시 user/join 뷰로
+        }
+
+        try {
+            // 1. 비밀번호 해쉬함수로 해쉬값으로 변경
+            // 2. 이메일을 암호화 처리
+            // userid의 해쉬값
+            // email 암호화
+            String cipherPass = CipherUtil.makehash(userDto.getPassword());
+            userDto.setPassword(cipherPass);
+            String cipherUserid = CipherUtil.makehash(userDto.getUserid());
+            String cipherEmail = CipherUtil.encrypt(userDto.getEmail(), cipherUserid);
+            userDto.setEmail(cipherEmail);
+
+            User user = userMapper.toEntity(userDto);
+
+            service.userInsert(user);
+        } catch (DataIntegrityViolationException e) { // 키값 중복된 경우 (아이디 중복)
+            e.printStackTrace();
+            bresult.reject("error.duplicate.user", "이미 존재하는 아이디입니다."); // 아이디 중복 오류
+            return "user/join";
+        } catch (Exception e) { // 기타 예외
+            e.printStackTrace();
+            bresult.reject("error.join.failed", "회원가입 중 알 수 없는 오류가 발생했습니다."); // 일반적인 회원가입 실패 메시지
+            return "user/join";
+        }
+        return "redirect:/user/login"; // 성공 시 로그인 페이지로 리다이렉트 (절대 경로)
+    }
+
+    @GetMapping("login")
+    public String callLogin(HttpSession session,Model model) {
+        String clientId = "네이버의 client ID";
+        clientId = "RzGew7S74e2kohOsbFV7";
+        String redirectURL = null;
+        try {
+            redirectURL = URLEncoder.encode("http://localhost:8080/user/naverlogin","UTF-8");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        SecureRandom random = new SecureRandom();
+        String state = new BigInteger(130,random).toString();
+        String apiURL = "https://nid.naver.com/oauth2.0/authorize?response_type=code";
+        apiURL += "&client_id="+clientId;
+        apiURL += "&redirect_uri="+redirectURL;
+        apiURL += "&state=" + state;
+        model.addAttribute(new User());
+        model.addAttribute("apiURL",apiURL);
+        session.getServletContext().setAttribute("state", state);
+        session.getServletContext().setAttribute("session", session);
+        System.out.println("1.session.id="+session.getId());
+        return "user/login";
+    }
+
+    @RequestMapping("naverlogin")
+    public String naverLogin(String code,String state,HttpSession session) {
+        System.out.println("2.session.id = "+session.getId());
+        String clientId = "클라이언트ID값"; //애플리케이션 클라이언트ID값
+        clientId = "RzGew7S74e2kohOsbFV7";
+        String clientSecret = "클라이언트 시크릿값";//애플리케이션 seceret값
+        clientSecret = "IeoYH5E8AW";
+        String redirectURL = null;
+        try {
+            redirectURL = URLEncoder.encode("YOUR_CALLBACK_URL","UTF-8");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        String apiURL;
+        apiURL = "https://nid.naver.com/oauth2.0/token?grant_type=authorization_code&";
+        apiURL += "client_id=" + clientId;
+        apiURL += "&client_secret=" + clientSecret;
+        apiURL += "&redirect_uri=" +redirectURL;
+        apiURL += "&code=" + code;
+        apiURL += "&state=" + state;
+        System.out.println("redirectURL : "+redirectURL);
+        System.out.println("code="+code+",state="+state);
+        //String access_token="";
+        //String refresh_token = "";
+        StringBuffer res = new StringBuffer();
+
+        System.out.println("apiURL : "+apiURL);
+        try {
+            URL url = new URL(apiURL);
+            //apiURL연결 성공
+            HttpURLConnection con = (HttpURLConnection)url.openConnection();
+            con.setRequestMethod("GET");
+            int responseCode = con.getResponseCode();
+            BufferedReader br;
+            System.out.println("responseCode="+responseCode);
+            if(responseCode==200) {
+                //정상 호출
+                br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+
+            } else {
+                // 에러 발생
+                br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+            }
+            String inputLine;
+
+            while ((inputLine = br.readLine()) != null) {
+                res.append(inputLine);
+            }
+            br.close();
+            System.out.println("responseCode :: "+responseCode);
+            if(responseCode==200) {
+                System.out.println("성공");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //JSON형태의 문자열데이터 -> JSON객체로변경위함
+        JSONParser parser = new JSONParser();
+        JSONObject json = null;
+        try {
+            json = (JSONObject)parser.parse(res.toString());
+            System.out.println("json : "+json.toString());
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        String token = (String)json.get("access_token");
+        System.out.println("token : "+token);
+        String header = "Bearer "+token;
+        try {
+            apiURL = "https://openapi.naver.com/v1/nid/me";
+            URL url = new URL(apiURL);
+            HttpURLConnection con = (HttpURLConnection)url.openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("Authorization", header);
+            int responseCode = con.getResponseCode();
+            BufferedReader br;
+            res = new StringBuffer();
+            if(responseCode ==200) {
+                br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            }
+            else {
+                br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+            }
+            String inputLine;
+            while((inputLine=br.readLine())!=null) {
+                res.append(inputLine);
+            }
+            br.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        //res : 로그인한 사용자의 정보 전달(JSON형식)
+        try {
+            json = (JSONObject)parser.parse(res.toString());
+            System.out.println("json : "+json.toString());
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw new ShopException("네이버 오류발생", "login");
+        }
+
+        JSONObject jsondetail = (JSONObject)json.get("response");
+        System.out.println("@ jsonDetail : @"+jsondetail);
+
+        String email = jsondetail.get("email").toString();
+        String userid = email.substring(0,email.indexOf("@"));
+        User user = service.selectUser(userid);
+        if(user==null) {
+            user = new User();
+            //user.setUserid(userid);
+            user.setUsername(jsondetail.get("name").toString());
+            String phone = jsondetail.get("mobile").toString();
+            user.setUserid(email.substring(0,email.indexOf("@")));
+            user.setEmail(email);
+            user.setPhoneno(phone);
+            user.setChannel("naver");
+            service.userInsert(user);
+        }
+        session.setAttribute("loginUser", user);
+        return "redirect:mypage?userid="+user.getUserid();
+    }
+
+    @PostMapping("login")
+    public String login(User user, BindingResult bresult, Model model, HttpSession session) throws Exception {
+        model.addAttribute("title", "로그인"); // 페이지 제목 설정
+
+        // 사용자 ID 및 비밀번호 길이 검증
+        if (user.getUserid().trim().length() < 3 || user.getUserid().trim().length() > 10) {
+            bresult.rejectValue("userid", "error.required.userid", "아이디는 3~10자리여야 합니다.");
+        }
+        if (user.getPassword().trim().length() < 3 || user.getPassword().trim().length() > 10) {
+            bresult.rejectValue("password", "error.required.password", "비밀번호는 3~10자리여야 합니다.");
+        }
+
+        if (bresult.hasErrors()) { // 등록된 오류 존재?
+            bresult.reject("error.input.check", "입력 값을 확인해 주세요."); // 전반적인 입력 확인 메시지
+            return "user/login"; // 오류 발생 시 다시 user/login 뷰로
+        }
+
+		User dbUser = service.selectUser(user.getUserid());
+		if(dbUser == null) { // 아이디 없음
+			bresult.reject("error.login.id", "존재하지 않는 아이디입니다.");
 			return "user/login";
-		} else {
-			// 그 외의 * 요청에 대한 기본 처리
-			model.addAttribute("user", new User());
-			model.addAttribute("title", "회원가입"); // 기본적으로 회원가입 폼을 보여주는 것으로 가정
-			return "user/join";
+		}
+
+		if(CipherUtil.makehash(user.getPassword()).equalsIgnoreCase(dbUser.getPassword())) { // 비밀번호 일치
+			session.setAttribute("loginUser", dbUser);
+			return "redirect:/user/mypage?userid=" + user.getUserid(); // 마이페이지로 리다이렉트 (절대 경로)
+		}
+        else { // 비밀번호 불일치
+			bresult.reject("error.login.password", "비밀번호가 일치하지 않습니다.");
+			return "user/login";
 		}
 	}
 
-	@PostMapping("join")
-	public String userAdd(@Valid UserDto userDto, BindingResult bresult, Model model) {
-		model.addAttribute("title", "회원가입"); // 페이지 제목 설정
+	@RequestMapping("mypage")
+	public String idCheckMypage(@RequestParam("userid") String userid, Model model) {
+		model.addAttribute("title", "내 정보"); // 페이지 제목 설정
 
-		if(bresult.hasErrors()) {
-			bresult.reject("error.input.user", "입력 값을 확인해 주세요."); // 전반적인 입력 오류
-			return "user/join"; // 오류 발생 시 다시 user/join 뷰로
-		}
+		User user = service.selectUser(userid);
+		//List<Sale> salelist = shopService.saleList(userid);
 
-		try {
-			// 1. 비밀번호 해쉬함수로 해쉬값으로 변경
-			// 2. 이메일을 암호화 처리
-			// userid의 해쉬값
-			// email 암호화
-			String cipherPass = CipherUtil.makehash(userDto.getPassword());
-			userDto.setPassword(cipherPass);
-			String cipherUserid = CipherUtil.makehash(userDto.getUserid());
-			String cipherEmail = CipherUtil.encrypt(userDto.getEmail(), cipherUserid);
-			userDto.setEmail(cipherEmail);
+		model.addAttribute("user", user);
+		//model.addAttribute("salelist", salelist);
 
-			User user = userMapper.toEntity(userDto);
-
-			service.userInsert(user);
-		} catch(DataIntegrityViolationException e) { // 키값 중복된 경우 (아이디 중복)
-			e.printStackTrace();
-			bresult.reject("error.duplicate.user", "이미 존재하는 아이디입니다."); // 아이디 중복 오류
-			return "user/join";
-		} catch(Exception e) { // 기타 예외
-			e.printStackTrace();
-			bresult.reject("error.join.failed", "회원가입 중 알 수 없는 오류가 발생했습니다."); // 일반적인 회원가입 실패 메시지
-			return "user/join";
-		}
-
-		return "redirect:/user/login"; // 성공 시 로그인 페이지로 리다이렉트 (절대 경로)
+		return "user/mypage"; // user/mypage 뷰 반환
 	}
 
-//	@PostMapping("login")
-//	public String login(@Valid User user, BindingResult bresult, Model model, HttpSession session) {
-//		model.addAttribute("title", "로그인"); // 페이지 제목 설정
-//
-//		// 사용자 ID 및 비밀번호 길이 검증
-//		if(user.getUserid().trim().length() < 3 || user.getUserid().trim().length() > 10) {
-//			bresult.rejectValue("userid", "error.required.userid", "아이디는 3~10자리여야 합니다.");
-//		}
-//		if(user.getPassword().trim().length() < 3 || user.getPassword().trim().length() > 10) {
-//			bresult.rejectValue("password", "error.required.password", "비밀번호는 3~10자리여야 합니다.");
-//		}
-//
-//		if(bresult.hasErrors()) { // 등록된 오류 존재?
-//			bresult.reject("error.input.check", "입력 값을 확인해 주세요."); // 전반적인 입력 확인 메시지
-//			return "user/login"; // 오류 발생 시 다시 user/login 뷰로
-//		}
-//
-//		User dbUser = service.selectUser(user.getUserid());
-//		if(dbUser == null) { // 아이디 없음
-//			bresult.reject("error.login.id", "존재하지 않는 아이디입니다.");
-//			return "user/login";
-//		}
-//
-//		if(user.getPassword().equals(dbUser.getPassword())) { // 비밀번호 일치
-//			session.setAttribute("loginUser", dbUser);
-//			return "redirect:/user/mypage?userid=" + user.getUserid(); // 마이페이지로 리다이렉트 (절대 경로)
-//		} else { // 비밀번호 불일치
-//			bresult.reject("error.login.password", "비밀번호가 일치하지 않습니다.");
-//			return "user/login";
-//		}
-//	}
-//
-//	@RequestMapping("mypage")
-//	public String idCheckMypage(@RequestParam("userid") String userid, Model model) {
-//		model.addAttribute("title", "내 정보"); // 페이지 제목 설정
-//
-//		User user = service.selectUser(userid);
-//		List<Sale> salelist = shopService.saleList(userid);
-//
-//		model.addAttribute("user", user);
-//		model.addAttribute("salelist", salelist);
-//
-//		return "user/mypage"; // user/mypage 뷰 반환
-//	}
-//
-//	@RequestMapping("logout")
-//	public String logout(HttpSession session) {
-//		session.invalidate(); // 세션 무효화
-//		return "redirect:/user/login"; // 로그인 페이지로 리다이렉트 (절대 경로)
-//	}
+	@RequestMapping("logout")
+	public String logout(HttpSession session) {
+		session.invalidate(); // 세션 무효화
+		return "redirect:/user/login"; // 로그인 페이지로 리다이렉트 (절대 경로)
+	}
 //
 //	// 로그인 상태, 본인정보만 조회 검증 => AOP 클래스 (UserLoginAspect.userIdCheck)
 //	// /user/update, /user/delete 요청을 각각 별도의 GetMapping으로 분리하는 것이 더 명확합니다.
@@ -332,15 +496,15 @@ public class UserController {
 //		}
 //	}
 
-	// 6자리 임시 비밀번호 생성
-	private String generateRandomPassword() {
-		String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		SecureRandom random = new SecureRandom();
-		StringBuilder sb = new StringBuilder(6);
-		for (int i = 0; i < 6; i++) {
-			sb.append(characters.charAt(random.nextInt(characters.length())));
-		}
-		return sb.toString();
-	}
+        // 6자리 임시 비밀번호 생성
+//        private String generateRandomPassword () {
+//            String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+//            SecureRandom random = new SecureRandom();
+//            StringBuilder sb = new StringBuilder(6);
+//            for (int i = 0; i < 6; i++) {
+//                sb.append(characters.charAt(random.nextInt(characters.length())));
+//            }
+//            return sb.toString();
+//        }
 
-}
+    }
