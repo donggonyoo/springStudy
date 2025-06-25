@@ -35,6 +35,8 @@ public class ItemController {
 		model.addAttribute("itemList",itemList);
 		return "item/list";
 	}
+	
+	
 	@GetMapping({"detail","update","delete"})
 	public ModelAndView getMap(@RequestParam Integer id) {
 		ModelAndView mav = new ModelAndView();
@@ -142,9 +144,7 @@ public class ItemController {
 		Item item = service.getItem(id);
 		mav.addObject("item",item);
 		return mav;
-	}
-	
-	
+	}	
 	*/
 
 }
