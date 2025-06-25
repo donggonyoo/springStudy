@@ -13,7 +13,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
-@Entity(name = "Usercipher")
+@Entity
 @Table(name = "usercipher")
 @Getter
 @Setter

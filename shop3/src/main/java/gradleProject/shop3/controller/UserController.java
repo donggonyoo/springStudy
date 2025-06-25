@@ -305,7 +305,9 @@ public class UserController {
 	public String idCheckMypage(@RequestParam("userid") String userid, Model model) {
 		model.addAttribute("title", "내 정보"); // 페이지 제목 설정
 
+        System.out.println("userid : "+userid);
 		User user = service.selectUser(userid);
+        System.out.println("userid : "+user.getUserid());
 		List<Sale> salelist = shopService.saleList(userid);
 
 		model.addAttribute("user", user);

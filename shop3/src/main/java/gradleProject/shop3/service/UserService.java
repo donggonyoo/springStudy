@@ -6,6 +6,8 @@ import gradleProject.shop3.util.CipherUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
 
@@ -21,7 +23,8 @@ public class UserService {
 	
 	public User selectUser(String userid) {
 		//userid에 해당하는 데이터조회후반환
-		User user = userRepository.findById(userid).get();
+		Optional<User> byId = userRepository.findById(userid);
+		User user = byId.get();
 		try{
 			String hashId = CipherUtil.makehash(user.getUserid());
 			String email = CipherUtil.decrypt(user.getEmail(), hashId);

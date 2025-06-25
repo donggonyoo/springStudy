@@ -109,15 +109,15 @@
                         <a th:href="@{/user/logout}" class="btn btn-outline-secondary btn-sm">로그아웃</a>
                         <a th:href="@{/user/update(userid=${user.userid})}" class="btn btn-primary btn-sm">회원정보 수정</a>
                         <a th:href="@{/user/password}" class="btn btn-secondary btn-sm">비밀번호 수정</a>
-                        <div th:if="${loginUser != null and loginUser.userid != 'admin'}" style="display:inline;">
+                        <div th:if="${session.loginUser != null and session.loginUser.userid != 'admin'}" style="display:inline;">
                             <a th:href="@{/user/delete(userid=${user.userid})}" class="btn btn-danger btn-sm">회원탈퇴</a>
                         </div>
-                        <div th:if="${loginUser != null and loginUser.userid == 'admin'}" style="display:inline;">
+                        <div th:if="${session.loginUser != null and session.loginUser.userid == 'admin'}" style="display:inline;">
                             <a th:href="@{/admin/list}" class="btn btn-info btn-sm">회원목록</a>
                         </div>
                     </div>
                     <div>
-                        <a href="../item/list" class="btn btn-success btn-sm">
+                        <a th:href="@{/item/list}" class="btn btn-success btn-sm">
                             <i class="bi bi-list-ul"></i> 상품 보기
                         </a>
                     </div>

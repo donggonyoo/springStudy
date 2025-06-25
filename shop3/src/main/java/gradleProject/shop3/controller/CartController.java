@@ -61,6 +61,11 @@ public class CartController {
 	@RequestMapping("cartView")
 	public String view(HttpSession session,Model model) {
 		model.addAttribute("message", "장바구니 상품 조회");
+		Cart cart = (Cart) session.getAttribute("CART");
+		if (cart == null) {
+			cart = new Cart();
+			session.setAttribute("CART", cart);
+		}
 		model.addAttribute("cart", session.getAttribute("CART"));
 		return "cart/cart";
 	}

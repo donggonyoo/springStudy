@@ -30,6 +30,7 @@ public class ItemController {
 
 		// itemList : item 테이블의 모든 정보를 저장 객체
 		List<Item> itemList = service.itemList();
+		System.out.println(itemList);
 		model.addAttribute("itemList", itemList); // view 에 전달할 객체 저장
 		model.addAttribute("title", "상품 목록"); // 레이아웃에 전달할 페이지 제목
 
