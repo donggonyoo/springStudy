@@ -103,7 +103,9 @@ public class ShopService {
 	public List<Sale> saleList(String userid) {
 
 		// userid 사용자가 주문정보 목록
-		List<Sale> list = saleRepository.findAll();
+		List<Sale> list = saleRepository.saleList(userid);
+		System.out.println("list : "+list);
+
 
 		for (Sale s : list) {//Sale 순회
 			// Sale객체 List<SaleItem>(주문상품모음리스트)에 데이터 할당.
@@ -111,6 +113,7 @@ public class ShopService {
 			// 1. saleitem의 saleid가 Sale의 saleid를 참조하므로
 			//    saleid로 saleitem에서 데이터 가져옴
 			List<SaleItem> saleItemList = saleRepository.findById(s.getSaleid()).get().getItemList();
+			System.out.println("saleItemList : "+saleItemList);
 			// 2. 주문상품을 모아둔saleItemList을 순회하며 Item정보를 조회하여 Item데이터 세팅
 			for (SaleItem si : saleItemList) {
 				Item item = itemRepository.findById(si.getItemid()).get();

@@ -306,10 +306,10 @@ public class UserController {
 		model.addAttribute("title", "내 정보"); // 페이지 제목 설정
 
 		User user = service.selectUser(userid);
-		//List<Sale> salelist = shopService.saleList(userid);
+		List<Sale> salelist = shopService.saleList(userid);
 
 		model.addAttribute("user", user);
-		//model.addAttribute("salelist", salelist);
+		model.addAttribute("salelist", salelist);
 
 		return "user/mypage"; // user/mypage 뷰 반환
 	}
