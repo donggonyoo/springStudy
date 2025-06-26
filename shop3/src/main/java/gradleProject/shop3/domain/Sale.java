@@ -5,6 +5,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -17,6 +18,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
 public class Sale {// 주문정보
 
 	@Id
@@ -25,6 +27,7 @@ public class Sale {// 주문정보
 	private Date saledate;
 	@Transient
 	private User user;
+
 	@Transient
 	private List<SaleItem> itemList = new ArrayList<>();
 	

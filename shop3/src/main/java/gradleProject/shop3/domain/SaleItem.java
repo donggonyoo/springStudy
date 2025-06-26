@@ -1,14 +1,14 @@
 package gradleProject.shop3.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 @Entity
+@Table(name="saleitem")
+@IdClass(SaleItemId.class)
 @Getter
 @Setter
 @ToString
@@ -17,7 +17,9 @@ public class SaleItem {// 주문상품
 
 	@Id
 	private int saleid;
+	@Id
 	private int seq;
+
 	private int itemid;
 	private int quantity;
 	@Transient

@@ -20,10 +20,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -123,7 +121,7 @@ public class UserController {
         clientId = "RzGew7S74e2kohOsbFV7";
         String redirectURL = null;
         try {
-            redirectURL = URLEncoder.encode("http://localhost:8080/user/naverlogin","UTF-8");
+            redirectURL = URLEncoder.encode("http://localhost:8083/user/naverlogin","UTF-8");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -292,7 +290,8 @@ public class UserController {
 		}
 
 		if(CipherUtil.makehash(user.getPassword()).equalsIgnoreCase(dbUser.getPassword())) { // 비밀번호 일치
-			session.setAttribute("loginUser", dbUser);
+            user = emailDecrypt(dbUser);
+            session.setAttribute("loginUser", user);
 			return "redirect:/user/mypage?userid=" + user.getUserid(); // 마이페이지로 리다이렉트 (절대 경로)
 		}
         else { // 비밀번호 불일치
@@ -302,15 +301,16 @@ public class UserController {
 	}
 
 	@RequestMapping("mypage")
-	public String idCheckMypage(@RequestParam("userid") String userid, Model model) {
+	public String idCheckMypage( Model model,@RequestParam("userid") String userid,HttpSession session) throws Exception {
 		model.addAttribute("title", "내 정보"); // 페이지 제목 설정
 
         System.out.println("userid : "+userid);
 		User user = service.selectUser(userid);
-        System.out.println("userid : "+user.getUserid());
-		List<Sale> salelist = shopService.saleList(userid);
+        User user1 = emailDecrypt(user);
 
-		model.addAttribute("user", user);
+        List<Sale> salelist = shopService.saleList(userid);
+
+		model.addAttribute("user", user1);
 		model.addAttribute("salelist", salelist);
 
 		return "user/mypage"; // user/mypage 뷰 반환
@@ -321,192 +321,235 @@ public class UserController {
 		session.invalidate(); // 세션 무효화
 		return "redirect:/user/login"; // 로그인 페이지로 리다이렉트 (절대 경로)
 	}
+    private User emailDecrypt(User user) throws Exception {
+        String key = CipherUtil.makehash(user.getUserid());
+        String plainEmail = CipherUtil.decrypt(user.getEmail(),key);
+        System.out.println(plainEmail);
+        user.setEmail(plainEmail);
+        return user;
+    }
+
+    private User emailEncrypt(User user) throws Exception {
+        String email = user.getEmail();
+        String key = CipherUtil.makehash(user.getUserid());
+        String hashEmail = CipherUtil.encrypt(user.getEmail(),key);
+        user.setEmail(hashEmail);
+        return user;
+    }
 //
 //	// 로그인 상태, 본인정보만 조회 검증 => AOP 클래스 (UserLoginAspect.userIdCheck)
 //	// /user/update, /user/delete 요청을 각각 별도의 GetMapping으로 분리하는 것이 더 명확합니다.
 //	// 기존의 * 방식 처리에서 특정 뷰를 반환하기 위해 HttpServletRequest를 사용하는 예시
-//	@GetMapping({"update", "delete"})
-//	public String idCheckUser(@RequestParam("userid") String userid, Model model, HttpServletRequest request) {
-//		User user = service.selectUser(userid);
-//		model.addAttribute("user", user);
+	@GetMapping({"update", "delete"})
+	public String idCheckUser(@RequestParam("userid") String userid, Model model, HttpServletRequest request) throws Exception {
+		User user = service.selectUser(userid);
+        UserDto userDto = new UserDto(user);
+        model.addAttribute("userDto", userDto);
+		// 요청 경로에 따라 뷰 이름 설정
+		String requestURI = request.getRequestURI(); // 현재 요청의 URI 가져오기
+		if (requestURI.endsWith("/user/update")) {
+			model.addAttribute("title", "정보 수정");
+			return "user/update";
+		} else if (requestURI.endsWith("/user/delete")) {
+			model.addAttribute("title", "회원 탈퇴");
+			return "user/delete";
+		} else {
+			// 예외 처리 또는 기본 에러 페이지로
+			model.addAttribute("title", "페이지 오류");
+			return "error/error";
+		}
+	}
 //
-//		// 요청 경로에 따라 뷰 이름 설정
-//		String requestURI = request.getRequestURI(); // 현재 요청의 URI 가져오기
-//		if (requestURI.endsWith("/user/update")) {
-//			model.addAttribute("title", "정보 수정");
-//			return "user/update";
-//		} else if (requestURI.endsWith("/user/delete")) {
-//			model.addAttribute("title", "회원 탈퇴");
-//			return "user/delete";
-//		} else {
-//			// 예외 처리 또는 기본 에러 페이지로
-//			model.addAttribute("title", "페이지 오류");
-//			return "error/error";
-//		}
-//	}
-//
-//	@PostMapping("update")
-//	public String idCheckUpdate(@Valid User user, BindingResult bresult, Model model, HttpSession session) {
-//		model.addAttribute("title", "정보 수정"); // 페이지 제목 설정
-//
-//		if(bresult.hasErrors()) {
-//			bresult.reject("error.update.user", "회원 정보 수정 중 오류가 발생했습니다."); // 전반적인 수정 오류
-//			return "user/update"; // 오류 발생 시 다시 user/update 뷰로
-//		}
-//
-//		// 비밀번호 검증
-//		User loginUser = (User) session.getAttribute("loginUser");
-//		if(loginUser == null || !loginUser.getPassword().equals(user.getPassword())) {
-//			bresult.reject("error.login.password", "비밀번호가 일치하지 않습니다.");
-//			return "user/update";
-//		}
-//
-//		try {
-//			service.userUpdate(user);
-//			if(loginUser.getUserid().equals(user.getUserid())) {
-//				session.setAttribute("loginUser", user); // 수정된 정보로 세션 업데이트
-//			}
-//			return "redirect:/user/mypage?userid=" + user.getUserid(); // 마이페이지로 리다이렉트 (절대 경로)
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			throw new ShopException("고객 정보 수정 실패", "/user/update?userid=" + user.getUserid()); // 오류 발생 시 예외 처리
-//		}
-//	}
-//
-//	@PostMapping("delete")
-//	public String idCheckDelete(@RequestParam("password") String password,
-//								@RequestParam("userid") String userid,
-//								Model model, HttpSession session) {
-//		model.addAttribute("title", "회원 탈퇴"); // 페이지 제목 설정
-//
-//		User loginUser = (User) session.getAttribute("loginUser");
-//
-//		// 관리자 탈퇴 불가
-//		if(userid.equals("admin")) {
-//			throw new ShopException("관리자는 탈퇴할 수 없습니다.", "/user/mypage?userid="+userid);
-//		}
-//
-//		// 비밀번호 불일치 (탈퇴하려는 사용자 본인의 비밀번호와 비교)
-//		User userToDelete = service.selectUser(userid); // 탈퇴하려는 사용자 정보 조회
-//		if(userToDelete == null || !password.equals(userToDelete.getPassword())) {
-//			throw new ShopException("비밀번호를 확인하세요.", "/user/delete?userid="+userid);
-//		}
-//
-//		try {
-//			service.userDelete(userid);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			throw new ShopException("회원 탈퇴 중 오류 발생", "/user/delete?userid="+userid);
-//		}
-//
-//		String redirectUrl;
-//		if(loginUser != null && loginUser.getUserid().equals("admin")) {
-//			redirectUrl = "redirect:/admin/list"; // 관리자라면 관리자 목록 페이지로 (절대 경로)
-//		} else {
-//			session.invalidate(); // 본인 탈퇴 시 세션 무효화
-//			redirectUrl = "redirect:/user/login"; // 로그인 페이지로 리다이렉트 (절대 경로)
-//		}
-//		return redirectUrl;
-//	}
-//
-//	@GetMapping("password")
-//	public String loginCheckform(Model model) {
-//		model.addAttribute("title", "비밀번호 변경"); // 페이지 제목 설정
-//		return "user/password"; // user/password 뷰 반환
-//	}
-//
-//	@PostMapping("password")
-//	public String loginCheckPassword(@RequestParam("password") String password, // 현재 비밀번호
-//									 @RequestParam("chgpass") String chgpass, // 변경할 비밀번호
-//									 Model model, HttpSession session) {
-//		model.addAttribute("title", "비밀번호 변경"); // 페이지 제목 설정
-//
-//		User loginUser = (User) session.getAttribute("loginUser");
-//
-//		if (loginUser == null) {
-//			throw new ShopException("로그인 후 이용해 주세요.", "/user/login");
-//		}
-//
-//		// 현재 입력받은 비밀번호와 로그인된 사용자의 실제 비밀번호 비교
-//		if(!password.equals(loginUser.getPassword())) {
-//			throw new ShopException("현재 비밀번호가 일치하지 않습니다. 다시 확인해주세요.", "/user/password");
-//		}
-//
-//		try {
-//			service.updatePassword(loginUser.getUserid(), chgpass); // 서비스 호출
-//			loginUser.setPassword(chgpass); // 세션에 저장된 사용자 정보 업데이트
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			throw new ShopException("비밀번호 변경 중 오류가 발생했습니다.", "/user/password");
-//		}
-//
-//		return "redirect:/user/mypage?userid=" + loginUser.getUserid(); // 마이페이지로 리다이렉트 (절대 경로)
-//	}
-//
-//	@PostMapping("{url}search") // url은 'id' 또는 'pw'가 될 것
-//	public String search(@Valid User user, BindingResult bresult, @PathVariable String url, Model model) {
-//		model.addAttribute("title", "검색 결과"); // 페이지 제목 기본 설정
-//
-//		boolean isPasswordSearch = "pw".equals(url); // 비밀번호 찾기인지 여부
-//		String title = isPasswordSearch ? "비밀번호 찾기" : "아이디 찾기";
-//		String errorCode = isPasswordSearch ? "error.password.search" : "error.userid.search";
-//		String errorMessage = isPasswordSearch ? "입력하신 정보로 비밀번호를 찾을 수 없습니다." : "입력하신 정보로 아이디를 찾을 수 없습니다.";
-//
-//		model.addAttribute("title", title); // 실제 페이지 제목 설정 (아이디 찾기/비밀번호 찾기)
-//
-//		// 사용자 입력 유효성 검사
-//		validateUserInput(user, bresult, isPasswordSearch);
-//
-//		if (bresult.hasErrors()) {
-//			bresult.reject("error.input.check", "입력 값을 확인해 주세요."); // 전반적인 입력 확인 메시지
-//			return "user/search"; // 오류 시 다시 user/search 뷰로
-//		}
-//
-//		// userid가 빈 문자열이면 null 처리 (id 찾기 시 userid는 필요 없음)
-//		if (!isPasswordSearch && StringUtils.isEmpty(user.getUserid())) {
-//			user.setUserid(null);
-//		}
-//
-//		String result = service.getSearch(user); // DB에서 검색
-//		if (result == null) {
-//			bresult.reject(errorCode, errorMessage); // 검색 결과 없음 오류
-//			return "user/search"; // 오류 시 다시 user/search 뷰로
-//		}
-//
-//		// 비밀번호 초기화 로직 (비밀번호 찾기인 경우)
-//		if (isPasswordSearch) {
-//			String newPassword = generateRandomPassword(); // 새 임시 비밀번호 생성
-//			service.updatePassword(user.getUserid(), newPassword); // DB에 새 비밀번호 업데이트
-//			model.addAttribute("result", "임시 비밀번호가 발급되었습니다. 새로운 비밀번호: " + newPassword);
-//		} else {
-//			model.addAttribute("result", "찾으시는 아이디: " + result);
-//		}
-//
-//		return "user/search"; // 검색 결과 뷰 반환
-//	}
-//
-//	// 사용자 입력 유효성 검사 (search 메서드에서 호출)
-//	private void validateUserInput(User user, BindingResult bresult, boolean isPasswordSearch) {
-//		if (isPasswordSearch && !StringUtils.hasText(user.getUserid())) {
-//			bresult.rejectValue("userid", "error.required.userid", "아이디를 입력해 주세요.");
-//		}
-//		if (!StringUtils.hasText(user.getEmail())) {
-//			bresult.rejectValue("email", "error.required.email", "이메일을 입력해 주세요.");
-//		}
-//		if (!StringUtils.hasText(user.getPhoneno())) {
-//			bresult.rejectValue("phoneno", "error.required.phoneno", "전화번호를 입력해 주세요.");
-//		}
-//	}
+	@PostMapping("update")
+	public String idCheckUpdate(@Valid UserDto dto, BindingResult bresult, Model model, HttpSession session) throws Exception {
+		model.addAttribute("title", "정보 수정"); // 페이지 제목 설정
+        System.out.println("dto ::  "+dto);
 
-        // 6자리 임시 비밀번호 생성
-//        private String generateRandomPassword () {
-//            String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-//            SecureRandom random = new SecureRandom();
-//            StringBuilder sb = new StringBuilder(6);
-//            for (int i = 0; i < 6; i++) {
-//                sb.append(characters.charAt(random.nextInt(characters.length())));
-//            }
-//            return sb.toString();
-//        }
+		if(bresult.hasErrors()) {
+			bresult.reject("error.update.user", "회원 정보 수정 중 오류가 발생했습니다."); // 전반적인 수정 오류
+			return "user/update"; // 오류 발생 시 다시 user/update 뷰로
+		}
+
+		// 비밀번호 검증
+		User loginUser = (User) session.getAttribute("loginUser");
+		if(!CipherUtil.makehash(dto.getPassword()).equalsIgnoreCase(loginUser.getPassword())) {
+			bresult.reject("error.login.password", "비밀번호가 일치하지 않습니다.");
+			return "user/update";
+		}
+
+		try {
+            User user = new User(dto);
+            User user1 = emailEncrypt(user);
+            user1.setPassword(CipherUtil.makehash(dto.getPassword()));
+            service.userUpdate(user1);
+			if(loginUser.getUserid().equals(user.getUserid())) {
+				session.setAttribute("loginUser", user1); // 수정된 정보로 세션 업데이트
+			}
+			return "redirect:/user/mypage?userid=" + user1.getUserid(); // 마이페이지로 리다이렉트 (절대 경로)
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ShopException("고객 정보 수정 실패", "/user/update?userid=" + dto.getUserid()); // 오류 발생 시 예외 처리
+		}
+	}
+//
+	@PostMapping("delete")
+	public String idCheckDelete(@RequestParam("password") String password,
+								@RequestParam("userid") String userid,
+								Model model, HttpSession session) throws Exception {
+		model.addAttribute("title", "회원 탈퇴"); // 페이지 제목 설정
+
+		User loginUser = (User) session.getAttribute("loginUser");
+
+		// 관리자 탈퇴 불가
+		if(userid.equals("admin")) {
+			throw new ShopException("관리자는 탈퇴할 수 없습니다.", "/user/mypage?userid="+userid);
+		}
+
+		// 비밀번호 불일치 (탈퇴하려는 사용자 본인의 비밀번호와 비교)
+		User userToDelete = service.selectUser(userid); // 탈퇴하려는 사용자 정보 조회
+		if(userToDelete == null || !CipherUtil.makehash(password).equals(userToDelete.getPassword())) {
+			throw new ShopException("비밀번호를 확인하세요.", "/user/delete?userid="+userid);
+		}
+
+		try {
+			service.userDelete(userid);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ShopException("회원 탈퇴 중 오류 발생", "/user/delete?userid="+userid);
+		}
+
+		String redirectUrl;
+		if(loginUser != null && loginUser.getUserid().equals("admin")) {
+			redirectUrl = "redirect:/admin/list"; // 관리자라면 관리자 목록 페이지로 (절대 경로)
+		} else {
+			session.invalidate(); // 본인 탈퇴 시 세션 무효화
+			redirectUrl = "redirect:/user/login"; // 로그인 페이지로 리다이렉트 (절대 경로)
+		}
+		return redirectUrl;
+	}
+//
+	@GetMapping("password")
+	public String loginCheckform(Model model) {
+		model.addAttribute("title", "비밀번호 변경"); // 페이지 제목 설정
+		return "user/password"; // user/password 뷰 반환
+	}
+//
+	@PostMapping("password")
+	public String loginCheckPassword(@RequestParam("password") String password, // 현재 비밀번호
+									 @RequestParam("chgpass") String chgpass, // 변경할 비밀번호
+									 Model model, HttpSession session) throws Exception {
+		model.addAttribute("title", "비밀번호 변경"); // 페이지 제목 설정
+
+		User loginUser = (User) session.getAttribute("loginUser");
+
+		if (loginUser == null) {
+			throw new ShopException("로그인 후 이용해 주세요.", "/user/login");
+		}
+
+		// 현재 입력받은 비밀번호와 로그인된 사용자의 실제 비밀번호 비교
+		if(!CipherUtil.makehash(password).equals(loginUser.getPassword())) {
+			throw new ShopException("현재 비밀번호가 일치하지 않습니다. 다시 확인해주세요.", "/user/password");
+		}
+
+		try {
+            String makehash = CipherUtil.makehash(chgpass);
+            service.updatePassword(loginUser.getUserid(), makehash); // 서비스 호출
+			loginUser.setPassword(makehash); // 세션에 저장된 사용자 정보 업데이트
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ShopException("비밀번호 변경 중 오류가 발생했습니다.", "/user/password");
+		}
+
+		return "redirect:/user/mypage?userid=" + loginUser.getUserid(); // 마이페이지로 리다이렉트 (절대 경로)
+	}
+    @GetMapping("idSearch")
+    public String idSearchForm(Model model) {
+        model.addAttribute("userDto", new UserDto()); // 폼 바인딩을 위한 빈 User 객체
+        model.addAttribute("title", "아이디 찾기");
+        return "user/idSearch"; // templates/user/idSearch.html 파일을 반환
+    }
+
+    // 2. 비밀번호 찾기 페이지 (GET)
+    @GetMapping("pwSearch")
+    public String pwSearchForm(Model model) {
+        model.addAttribute("userDto", new UserDto()); // 폼 바인딩을 위한 빈 User 객체
+        model.addAttribute("title", "비밀번호 찾기");
+        return "user/pwSearch"; // templates/user/pwSearch.html 파일을 반환
+    }
+
+    // 3. 아이디 찾기 처리 (POST)
+    @PostMapping("idSearch")
+    public String idSearch( @Valid UserDto user, BindingResult bresult, Model model) throws Exception {
+        System.out.println("user :: "+user);
+        model.addAttribute("title", "아이디 찾기");
+
+        if (!StringUtils.hasText(user.getEmail()) || !StringUtils.hasText(user.getPhoneno())) {
+            bresult.reject("error.input.check", "모든 값을 입력해주세요.");
+            return "user/idSearch";
+        }
+        User user1 = new User(user);
+        String resultId = service.getSearch(user1);
+
+
+        if (resultId == null) {
+            model.addAttribute("result", "입력하신 정보와 일치하는 사용자가 없습니다.");
+            bresult.reject("error.search", "User not found"); // Thymeleaf에서 에러 스타일링을 위해
+        } else {
+            model.addAttribute("result", "회원님의 아이디는 [ " + resultId + " ] 입니다.");
+        }
+        return "user/idSearch"; // 결과를 포함하여 다시 아이디 찾기 페이지를 보여줌
+    }
+
+    // 4. 비밀번호 찾기 처리 (POST)
+    @PostMapping("pwSearch")
+    public String pwSearch(@ModelAttribute UserDto user, BindingResult bresult, Model model) throws Exception {
+
+        model.addAttribute("title", "비밀번호 찾기");
+
+        if (!StringUtils.hasText(user.getUserid()) || !StringUtils.hasText(user.getEmail()) || !StringUtils.hasText(user.getPhoneno())) {
+            bresult.reject("error.input.check", "모든 값을 입력해주세요.");
+            return "user/pwSearch";
+        }
+
+        User user1 = new User(user);
+        String resultId = service.getSearch(user1); // 먼저 해당 정보로 사용자가 있는지 확인
+
+        if (resultId == null) {
+            model.addAttribute("result", "입력하신 정보와 일치하는 사용자가 없습니다.");
+            bresult.reject("error.search", "User not found"); // Thymeleaf에서 에러 스타일링을 위해
+        } else {
+            String newPassword = generateRandomPassword();
+            // 중요: 새로 생성된 비밀번호도 반드시 해시 처리하여 저장해야 합니다.
+            service.updatePassword(resultId,CipherUtil.makehash(newPassword));
+            model.addAttribute("result", "임시 비밀번호가 발급되었습니다: [ " + newPassword + " ] 로그인 후 바로 변경해주세요.");
+        }
+        return "user/pwSearch"; // 결과를 포함하여 다시 비밀번호 찾기 페이지를 보여줌
+    }
+
+
+
+	// 사용자 입력 유효성 검사 (search 메서드에서 호출)
+	private void validateUserInput(User user, BindingResult bresult, boolean isPasswordSearch) {
+		if (isPasswordSearch && !StringUtils.hasText(user.getUserid())) {
+			bresult.rejectValue("userid", "error.required.userid", "아이디를 입력해 주세요.");
+		}
+		if (!StringUtils.hasText(user.getEmail())) {
+			bresult.rejectValue("email", "error.required.email", "이메일을 입력해 주세요.");
+		}
+		if (!StringUtils.hasText(user.getPhoneno())) {
+			bresult.rejectValue("phoneno", "error.required.phoneno", "전화번호를 입력해 주세요.");
+		}
+	}
+
+
+        private String generateRandomPassword () {
+            String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            SecureRandom random = new SecureRandom();
+            StringBuilder sb = new StringBuilder(6);
+            for (int i = 0; i < 6; i++) {
+                sb.append(characters.charAt(random.nextInt(characters.length())));
+            }
+            return sb.toString();
+        }
 
     }

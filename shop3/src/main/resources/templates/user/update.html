@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout}">
+<head>
+	<meta charset="UTF-8"/>
+	<title>사용자 수정</title>
+	<style>
+		.error {
+			color: red;
+			font-size: 0.9em;
+		}
+		table {
+			border-collapse: collapse;
+			width: 100%;
+			max-width: 600px;
+			margin: 20px 0;
+		}
+		th, td {
+			padding: 10px;
+			text-align: left;
+			border: 1px solid #ddd;
+		}
+		th {
+			background-color: #f4f4f4;
+		}
+		input[type="text"], input[type="password"], input[type="submit"], input[type="reset"], input[type="button"] {
+			padding: 5px;
+			margin: 5px 0;
+		}
+	</style>
+</head>
+<body>
+<div layout:fragment="content">
+	<h2>사용자 수정</h2>
+	<form th:object="${userDto}" th:action="@{/user/update}" method="post">
+		<!-- 글로벌 에러 출력 -->
+		<th:block th:if="${#fields.hasGlobalErrors()}">
+			<div th:each="error : ${#fields.globalErrors()}" class="error">
+				<span th:text="${error}"></span>
+			</div>
+		</th:block>
+
+		<table>
+			<tr>
+				<th>아이디</th>
+				<td>
+					<input type="text" th:field="*{userid}" id="userid" readonly/>
+					<div th:errors="*{userid}" class="error"></div>
+				</td>
+			</tr>
+			<tr>
+				<th>비밀번호</th>
+				<td>
+					<input type="password" th:field="*{password}"/>
+					<div th:errors="*{password}" class="error"></div>
+				</td>
+			</tr>
+			<tr>
+				<th>이름</th>
+				<td>
+					<input type="text" th:field="*{username}"/>
+					<div th:errors="*{username}" class="error"></div>
+				</td>
+			</tr>
+			<tr>
+				<th>전화번호</th>
+				<td>
+					<input type="text" th:field="*{phoneno}"/>
+					<div th:errors="*{phoneno}" class="error"></div>
+				</td>
+			</tr>
+			<tr>
+				<th>우편번호</th>
+				<td>
+					<input type="text" th:field="*{postcode}"/>
+					<div th:errors="*{postcode}" class="error"></div>
+				</td>
+			</tr>
+			<tr>
+				<th>주소</th>
+				<td>
+					<input type="text" th:field="*{address}"/>
+					<div th:errors="*{address}" class="error"></div>
+				</td>
+			</tr>
+			<tr>
+				<th>이메일</th>
+				<td>
+					<input type="text" th:field="*{email}"/>
+					<div th:errors="*{email}" class="error"></div>
+				</td>
+			</tr>
+			<tr>
+				<th>생년월일</th>
+				<td>
+					<input type="text" th:field="*{birthday}"/>
+					<div th:errors="*{birthday}" class="error"></div>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<input type="submit" value="수정완료"/>
+					<input type="reset" value="초기화"/>
+					<input type="button" value="돌아가기" th:onclick="|window.location.href='@{/mypage(userid=${userDto.userid})}'|"/>
+				</td>
+			</tr>
+		</table>
+	</form>
+</div>
+</body>
+</html>

@@ -1,5 +1,7 @@
 package gradleProject.shop3.util;
 
+import gradleProject.shop3.domain.User;
+
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.KeyGenerator;
@@ -216,6 +218,26 @@ public class CipherUtil {
         return null;
 
 
+    }
+    public static User emailDecrypt(User user) throws Exception {
+        String key = CipherUtil.makehash(user.getUserid());
+        String plainEmail = CipherUtil.decrypt(user.getEmail(),key);
+        System.out.println(plainEmail);
+        user.setEmail(plainEmail);
+        return user;
+    }
+
+    public static User emailEncrypt(User user) throws Exception {
+        String email = user.getEmail();
+        String key = CipherUtil.makehash(user.getUserid());
+        String hashEmail = CipherUtil.encrypt(user.getEmail(),key);
+        user.setEmail(hashEmail);
+        return user;
+    }
+
+    public static void main(String[] args) throws Exception {
+        String makehash = CipherUtil.makehash("ddkk8525@gmail.com");
+        System.out.println(makehash);
     }
 
 
