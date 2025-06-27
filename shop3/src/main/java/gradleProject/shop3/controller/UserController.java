@@ -284,6 +284,7 @@ public class UserController {
         }
 
 		User dbUser = service.selectUser(user.getUserid());
+        System.out.println("DBUser : "+dbUser);
 		if(dbUser == null) { // 아이디 없음
 			bresult.reject("error.login.id", "존재하지 않는 아이디입니다.");
 			return "user/login";
@@ -308,7 +309,8 @@ public class UserController {
 		User user = service.selectUser(userid);
         User user1 = emailDecrypt(user);
 
-        List<Sale> salelist = shopService.saleList(userid);
+       List<Sale> salelist = shopService.saleList(userid);
+        System.out.println("saleList ::"+salelist);
 
 		model.addAttribute("user", user1);
 		model.addAttribute("salelist", salelist);
@@ -489,8 +491,6 @@ public class UserController {
         }
         User user1 = new User(user);
         String resultId = service.getSearch(user1);
-
-
         if (resultId == null) {
             model.addAttribute("result", "입력하신 정보와 일치하는 사용자가 없습니다.");
             bresult.reject("error.search", "User not found"); // Thymeleaf에서 에러 스타일링을 위해

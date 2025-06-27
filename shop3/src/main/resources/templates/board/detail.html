@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${board != null} ? ${board.title} + ' - ' + ${boardName} : '게시글 상세'"></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+    <style>
+        .board-content {
+            min-height: 150px;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5 mb-5" layout:fragment="content">
+    <h2 class="mb-3" th:text="${boardName != null} ? ${boardName} : '게시판'"></h2>
+
+    <div th:if="${board != null}" class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h4 class="card-title mb-1" th:text="${board.title}"></h4>
+            <div class="d-flex justify-content-between text-muted small">
+                <div>
+                    <span class="me-3"><i class="bi bi-person-fill"></i> <span th:text="${board.writer}"></span></span>
+                    <span><i class="bi bi-calendar-check"></i> <span th:text="${#dates.format(board.regdate, 'yyyy-MM-dd')}"></span></span>
+                </div>
+                <span>조회수: <span th:text="${board.readcnt}"></span></span>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <h5 class="mt-2"><i class="bi bi-body-text"></i> 상세 내용</h5>
+            <hr>
+            <div class="board-content mb-4" th:text="${board.content}"></div>
+
+            <div th:if="${board.fileurl != null and board.fileurl != ''}">
+                <hr>
+                <div class="mt-3">
+                    <h6 class="card-subtitle text-muted"><i class="bi bi-paperclip"></i> 첨부파일</h6>
+                    <a th:href="@{/file/{fileurl}(fileurl=${board.fileurl})}" class="text-decoration-none ms-3 d-block mt-2" th:text="${board.fileurl}"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:unless="${board != null}" class="alert alert-warning">게시글을 찾을 수 없습니다.</div>
+
+    <div class="d-flex justify-content-between mt-4">
+        <div>
+            <a th:href="@{/board/list(boardid=${board.boardid})}" class="btn btn-secondary">
+            <a th:href="@{/board/list(boardid=${board.boardid})}" class="btn btn-secondary">
+                <i class="bi bi-list-ul"></i> 목록
+            </a>
+        </div>
+        <div th:if="${board != null}">
+            <a th:href="@{/board/reply(num=${board.num},boardid=${board.boardid})}" class="btn btn-primary me-1">
+                <i class="bi bi-reply-fill"></i> 답변
+            </a>
+            <a th:href="@{/board/update(num=${board.num},boardid=${board.boardid})}" class="btn btn-outline-primary me-1">
+                <i class="bi bi-pencil-square"></i> 수정
+            </a>
+            <form th:action="@{/board/delete(num=${board.num},boardid=${board.boardid})}" method="get" class="d-inline">
+                <input type="hidden" name="num" th:value="${board.num}">
+                <input type="hidden" name="boardid" th:value="${board.boardid}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
+                <button type="submit" class="btn btn-outline-danger">
+                    <i class="bi bi-trash3"></i> 삭제
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-5">
+        <div class="card-body">
+            <span id="comment"></span>
+            <h5 class="card-title mb-4"><i class="bi bi-chat-square-dots-fill"></i> 댓글</h5>
+
+            <!-- 댓글 목록 표시 -->
+            <div class="comment-list">
+                <th:block th:if="${commlist == null or commlist.isEmpty()}">
+                    <p class="text-muted">아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>
+                </th:block>
+                <th:block th:each="c, stat : ${commlist}">
+                    <div class="d-flex mb-3">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-person-circle fs-4 text-secondary"></i>
+                        </div>
+                        <div class="ms-3 w-100">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <span class="fw-bold" th:text="${c.writer}"></span>
+                                    <small class="text-muted ms-2" th:replace="~{fragments/formatDate :: formatDate(${c.regdate}, 'yyyy-MM-dd HH:mm:ss E요일')}"></small>
+                                </div>
+                                <!-- 댓글 삭제 폼 -->
+                                <form th:action="@{/board/commdel}" method="post" th:object="${comment}" class="d-flex">
+                                    <input type="hidden" name="num" th:value="${c.num}">
+                                    <input type="hidden" name="seq" th:value="${c.seq}">
+                                    <input type="password" th:field="*{pass}" class="form-control form-control-sm me-1" placeholder="비밀번호" style="width: 120px;">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm flex-shrink-0">삭제</button>
+                                </form>
+                            </div>
+                            <p class="mb-1 mt-1" th:utext="${c.content}"></p>
+                        </div>
+                    </div>
+                    <hr class="my-3">
+                </th:block>
+            </div>
+
+            <!-- 댓글 작성 폼 -->
+            <div class="comment-form mt-4">
+                <h6 class="mb-3">댓글 작성</h6>
+                <form th:object="${comment}" th:action="@{/board/comment}" method="post">
+                    <input type="hidden" name="num" th:value="${board?.num}"/>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
+                    <div class="row g-2 mb-2">
+                        <div class="col-md">
+                            <input th:field="*{writer}" class="form-control p-2" placeholder="작성자" />
+                            <div class="text-red-500 text-sm mt-1" th:errors="*{writer}"></div>
+                        </div>
+                        <div class="col-md">
+                            <input type="password" th:field="*{pass}" class="form-control p-2" placeholder="비밀번호" />
+                            <div class="text-red-500 text-sm mt-1" th:errors="*{pass}"></div>
+                        </div>
+                    </div>
+                    <textarea th:field="*{content}" rows="4" id="summernote" class="form-control p-2"></textarea>
+                    <div class="text-red-500 text-sm mt-1" th:errors="*{content}"></div>
+                    <button type="submit" class="btn btn-primary mt-2">댓글 등록</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#summernote').summernote({
+            height: 150,
+            callbacks: {
+                onImageUpload: function(images) {
+                    for (let i = 0; i < images.length; i++) {
+                        sendFile(images[i]);
+                    }
+                }
+            }
+        });
+    });
+
+    function sendFile(file) {
+        let data = new FormData();
+        data.append("image", file);
+        $.ajax({
+            url: /*[[@{/ajax/uploadImage}]]*/ '/ajax/uploadImage',
+            type: "POST",
+            data: data,
+            processData: false,
+            cache: false,
+            contentType: false,
+            success: function(src) {
+                $("#summernote").summernote("insertImage", src);
+            },
+            error: function(e) {
+                alert("이미지 업로드 실패: " + e.status);
+            }
+        });
+    }
+</script>
+</body>
+</html>

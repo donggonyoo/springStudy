@@ -1,17 +1,18 @@
 package gradleProject.shop3.service;
 
-import gradleProject.shop3.domain.Sale;
-import gradleProject.shop3.domain.SaleItem;
+import gradleProject.shop3.domain.*;
 import gradleProject.shop3.repository.ItemRepository;
-import gradleProject.shop3.domain.Item;
+import gradleProject.shop3.repository.SaleItemRepository;
 import gradleProject.shop3.repository.SaleRepository;
 import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.Date;
 import java.util.List;
 
 
@@ -25,6 +26,8 @@ public class ShopService {
 
 	@Value("D:/dongGit/springStudy/shop3/src/main/resources/static/")
 	private String resourceDir;
+    @Autowired
+    private SaleItemRepository saleItemRepository;
 
 
 	public List<Item> itemList() {
@@ -82,41 +85,41 @@ public class ShopService {
 		itemRepository.deleteById(id);
 	}
 
-//	public Sale checkEnd(User loginUser, Cart cart) {
-//		int maxsaleid = saleDao.getMaxSaleId();
-//		Sale sale = new Sale();
-//		sale.setSaleid(maxsaleid + 1);
-//		sale.setUser(loginUser);
-//		sale.setUserid(loginUser.getUserid());
-//
-//		saleDao.insert(sale);
-//		int seq = 0;// 주문상품 번호
-//		for (ItemSet is : cart.getItemSetList()) {
-//			SaleItem saleItem = new SaleItem(sale.getSaleid(), ++seq, is);
-//			sale.getItemList().add(saleItem);
-//			saleItemDao.insert(saleItem);
-//		}
-//
-//		return sale;
-//	}
+	public Sale checkEnd(User loginUser, Cart cart) {
+		int maxsaleid = saleRepository.getMaxSaleId();
+		Sale sale = new Sale();
+		sale.setSaleid(maxsaleid + 1);
+		sale.setUser(loginUser);
+		sale.setUserid(loginUser.getUserid());
+		sale.setSaledate(new Date());
+
+		saleRepository.save(sale);
+		int seq = 0;// 주문상품 번호
+		for (ItemSet is : cart.getItemSetList()) {
+			SaleItem saleItem = new SaleItem(sale.getSaleid(), ++seq, is);
+			sale.getItemList().add(saleItem);
+			saleItemRepository.save(saleItem);
+		}
+
+		return sale;
+	}
 //
 	public List<Sale> saleList(String userid) {
 
 		// userid 사용자가 주문정보 목록
-		List<Sale> list = saleRepository.saleList(userid);
+		List<Sale> list = saleRepository.findByUserid(userid);
 		System.out.println("list : "+list);
-
-
 		for (Sale s : list) {//Sale 순회
 			// Sale객체 List<SaleItem>(주문상품모음리스트)에 데이터 할당.
 
 			// 1. saleitem의 saleid가 Sale의 saleid를 참조하므로
 			//    saleid로 saleitem에서 데이터 가져옴
-			List<SaleItem> saleItemList = saleRepository.findById(s.getSaleid()).get().getItemList();
+			List<SaleItem> saleItemList = saleRepository.findById(s.getSaleid()).orElse(null).getItemList();
 			System.out.println("saleItemList : "+saleItemList);
 			// 2. 주문상품을 모아둔saleItemList을 순회하며 Item정보를 조회하여 Item데이터 세팅
 			for (SaleItem si : saleItemList) {
-				Item item = itemRepository.findById(si.getItemid()).get();
+				Item item = itemRepository.findById(si.getItemid()).orElse(null);
+				System.out.println("@@item : "+item);
 				si.setItem(item);
 			}
 			// 3. item정보를 세팅한 리스트를 각 Sale객체에 데이터 세팅
@@ -124,6 +127,8 @@ public class ShopService {
 		}
 		return list;
 	}
+
+
 //
 //	public void exchangeCreate() {
 //		Document doc = null;

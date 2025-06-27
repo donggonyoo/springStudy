@@ -27,7 +27,7 @@ public interface UserRepository extends JpaRepository<User,String> {
             List<User> searchByUserid(@Param("phoneno") String phoneno);
 
     @Query("select u.password from Usercipher u  where u.userid = :userid  and u.email = :email and u.phoneno = :phoneno")
-    String searchByPassword(@Param("userid")String userid,@Param("email")String eamil , @Param("phoneno") String phoneno);
+    String searchByPassword(@Param("userid")String userid,@Param("email")String email , @Param("phoneno") String phoneno);
 
     //list안의 userid를 꺼내 모든 컬럼조회
     List<User> findByUseridIn(String[] idchks);

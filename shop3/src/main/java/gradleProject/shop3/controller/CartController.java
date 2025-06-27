@@ -1,10 +1,9 @@
 package gradleProject.shop3.controller;
 
-import gradleProject.shop3.domain.Cart;
-import gradleProject.shop3.domain.Item;
-import gradleProject.shop3.domain.ItemSet;
+import gradleProject.shop3.domain.*;
 import gradleProject.shop3.dto.ItemAddDto;
 import gradleProject.shop3.service.ShopService;
+import gradleProject.shop3.util.CipherUtil;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -74,22 +73,38 @@ public class CartController {
 	 * 주문전 확인 페이지 1.장바구니에 상품존재해야함 상품이없는경우 예외발생 2.로그인 된 상태여야함 로그아웃상태 -> 예외발생
 	 */
 	@RequestMapping("checkout")
-	public String checkout(HttpSession session) {
-		return null;
+	public String checkout(Model model, HttpSession session) {
+		User loginUser = (User) session.getAttribute("loginUser");
+		Cart cart = (Cart) session.getAttribute("CART");
+
+		try {
+//			String key = CipherUtil.makehash(loginUser.getUserid());
+//			String plainEmail = CipherUtil.decrypt(loginUser.getEmail(), key);
+//			loginUser.setEmail(plainEmail);
+			CipherUtil.emailDecrypt(loginUser);
+		} catch (Exception e) {
+			loginUser.setEmail("(이메일 확인 불가)");
+		}
+
+		model.addAttribute("loginUser", loginUser);
+		model.addAttribute("cart", cart);
+
+		return "cart/checkout";
 	}
 
 	// check로시작하며 session매개변수 -> AOP사용
 	// 주문확정 클릭시 동작하는 컨트롤러
-//	@GetMapping("end")
-//	public ModelAndView checkEnd(HttpSession session) {
-//		ModelAndView mav = new ModelAndView();
-//		Cart cart = (Cart) session.getAttribute("CART");// 장바구니상품(List<ItemSet>)
-//		User loginUser = (User) session.getAttribute("loginUser");// User
-//		Sale sale = service.checkend(loginUser, cart);
-//		session.removeAttribute("CART");// 장바구니 초기화
-//		mav.addObject("sale", sale);
-//		return mav;
-//	}
+
+	@GetMapping("end")
+	public String checkEnd(HttpSession session,Model model) {
+		Cart cart = (Cart) session.getAttribute("CART");// 장바구니상품(List<ItemSet>)
+		User loginUser = (User) session.getAttribute("loginUser");// User
+		Sale sale = service.checkEnd(loginUser, cart);
+		session.removeAttribute("CART");// 장바구니 초기화
+		model.addAttribute("sale", sale);
+		System.out.println("sale:" + sale);
+		return "cart/end";
+	}
 //
 //	@RequestMapping("kakao")
 //	@ResponseBody //view없이 바로 데이터를 클라이언트로전송

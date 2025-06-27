@@ -1,9 +1,6 @@
 package gradleProject.shop3.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,20 +14,30 @@ import java.util.List;
 @Table(name="sale")
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 public class Sale {// 주문정보
 
 	@Id
 	private int saleid;
 	private String userid;
+
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date saledate;
-	@Transient
+
+	@ManyToOne
+	@JoinColumn(name = "userid", insertable = false, updatable = false)
 	private User user;
 
-	@Transient
+	@OneToMany(mappedBy = "sale", fetch = FetchType.EAGER)
 	private List<SaleItem> itemList = new ArrayList<>();
-	
+
+	@PrePersist
+	//save()함수 직전에 먼저호출
+	public void onePrePersist() {
+		this.saledate = new Date();
+	}
+
+
 	public int getTotal() {
 		return itemList.stream()
 				.mapToInt(s->s.getItem().getPrice() * s.getQuantity())

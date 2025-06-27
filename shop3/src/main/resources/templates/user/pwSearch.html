@@ -28,7 +28,7 @@
     <div class="card p-4">
         <h4 class="page-title text-center" th:text="${title}">아이디 찾기</h4>
 
-        <form th:object="${user}" th:action="@{/user/pwSearch}" method="post">
+        <form th:object="${userDto}" th:action="@{/user/pwSearch}" method="post">
             <div th:if="${result}"
                  class="result-box"
                  th:classappend="${#fields.hasGlobalErrors()} ? 'result-error' : 'result-success'">
