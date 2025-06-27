@@ -159,8 +159,8 @@ public class BoardService {
 					request.getServletContext().getRealPath("/")+"board/file/";
 			this.uploadFileCreate(board.getFile1(),path);
 			board.setFileurl(board.getFile1().getOriginalFilename());
-			board.setRegdate(new Date());
 		}
+		board.setRegdate(new Date());
 		Board boardMain = new Board(board);
 		boardRepository.save(boardMain);
 	}

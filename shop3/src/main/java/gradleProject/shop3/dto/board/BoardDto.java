@@ -2,7 +2,10 @@ package gradleProject.shop3.dto.board;
 
 import gradleProject.shop3.domain.Board;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,13 +18,13 @@ public class BoardDto {
 	@Id
 	private int num;
 	private String boardid;
-	@NotBlank(message="작성자 입력하세요")
+	@NotEmpty(message="작성자 입력하세요")
 	private String writer;
-	@NotBlank(message="비밀번호 입력하세요")
+	@NotEmpty(message="비밀번호 입력하세요")
 	private String pass;
-	@NotBlank(message="제목 입력하세요")
+	@NotEmpty(message="제목 입력하세요")
 	private String title;
-	@NotBlank(message="내용 입력하세요")
+	@NotEmpty(message="내용 입력하세요")
 	private String content;
 	private MultipartFile file1;
 	private String fileurl;

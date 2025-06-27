@@ -19,6 +19,11 @@
 			<input type="hidden" name="boardid" th:value="${boardid}">
 			<input type="hidden" name="num" th:value="${num}">
 			<table class="w-full table-auto border-collapse">
+				<th:block th:if="${#fields.hasGlobalErrors()}">
+					<div th:each="error : ${#fields.globalErrors()}" class="error">
+						<span th:text="${error}"></span>
+					</div>
+				</th:block>
 				<tr class="border-b">
 					<th class="p-4 w-1/5 font-medium text-gray-700 text-left">글쓴이</th>
 					<td class="p-4">

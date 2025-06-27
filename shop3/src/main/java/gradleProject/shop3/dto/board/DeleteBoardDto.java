@@ -3,8 +3,10 @@ package gradleProject.shop3.dto.board;
 import gradleProject.shop3.domain.Board;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class DeleteBoardDto {
 	
 	private int num;
