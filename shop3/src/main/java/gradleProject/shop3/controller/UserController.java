@@ -60,12 +60,11 @@ public class UserController {
         if (loginUser != null && StringUtils.hasText(loginUser.getUserid())) {
             return "redirect:/user/mypage?userid=" + loginUser.getUserid();
         }
-
         // 현재 요청 경로에 따라 적절한 뷰 설정 (더 명확하게 분리하는 것이 좋음)
         // 예를 들어, /user/join 요청은 user/join 뷰, /user/login 요청은 user/login 뷰
         String requestURI = request.getRequestURI();
         if (requestURI.endsWith("/user/join")) {
-            model.addAttribute("user", new User()); // 폼 바인딩용 User 객체
+            model.addAttribute("userDto", new UserDto()); // 폼 바인딩용 User 객체
             model.addAttribute("title", "회원가입");
             return "user/join";
         } else if (requestURI.endsWith("/user/login")) {
@@ -74,7 +73,7 @@ public class UserController {
             return "user/login";
         } else {
             // 그 외의 * 요청에 대한 기본 처리
-            model.addAttribute("user", new User());
+            model.addAttribute("userDto", new UserDto());
             model.addAttribute("title", "회원가입"); // 기본적으로 회원가입 폼을 보여주는 것으로 가정
             return "user/join";
         }

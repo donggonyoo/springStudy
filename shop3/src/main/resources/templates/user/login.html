@@ -100,13 +100,13 @@
 
             <div class="mb-3">
                 <label for="userid" class="form-label"><i class="bi bi-person"></i> 아이디</label>
-                <input type="text" id="userid" th:field="*{userid}" class="form-control" placeholder="아이디를 입력하세요"/>
+                <input type="text" id="userid" th:field="*{userid}" class="form-control" placeholder="아이디를 입력하세요" onkeyup="delerr()"/>
                 <div th:if="${#fields.hasErrors('userid')}" th:errors="*{userid}" class="error-message"></div>
             </div>
 
             <div class="mb-3">
                 <label for="password" class="form-label"><i class="bi bi-lock"></i> 비밀번호</label>
-                <input type="password" id="password" th:field="*{password}" class="form-control" placeholder="비밀번호를 입력하세요"/>
+                <input type="password" id="password" th:field="*{password}" class="form-control" placeholder="비밀번호를 입력하세요" onkeyup="delerr()"/>
                 <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error-message"></div>
             </div>
 
@@ -142,6 +142,13 @@
     function win_open(page) {
         var op = "width=500, height=350, left=50, top=150";
         window.open(page, "", op);
+    }
+    function delerr(){
+        let element = document.querySelectorAll(".error-message");
+        element.forEach(element=>{
+            element.style.display = 'none';
+        })
+
     }
 </script>
 </body>

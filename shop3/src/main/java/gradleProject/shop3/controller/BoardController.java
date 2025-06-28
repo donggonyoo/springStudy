@@ -119,7 +119,14 @@ public class BoardController {
 		model.addAttribute("comment",comm);
 		return "board/detail";
 	}
-//
+
+	@GetMapping("write")
+	public ModelAndView write() {
+			ModelAndView mav = new ModelAndView();
+			mav.addObject(new BoardDto());
+			return mav;
+		}
+
 	@PostMapping("write")
 	public String writePost(@Valid BoardDto dto , BindingResult bresult,
 			HttpServletRequest request) {
@@ -163,12 +170,10 @@ public String updateForm(@RequestParam int num,@RequestParam String boardid, Mod
 	public String replyForm(@RequestParam int num, Model model) {
 		Board parent = service.getBoard(num);
 		if (parent == null) throw new ShopException("답글을 작성할 게시물이 없습니다.", "list?boardid=1");
-		BoardDto dto = new BoardDto();
-		dto.setBoardid(parent.getBoardid());
-		dto.setGrp(parent.getGrp());
-		dto.setGrplevel(parent.getGrplevel());
-		dto.setGrpstep(parent.getGrpstep());
-		dto.setTitle("RE: " + parent.getTitle());
+		BoardDto dto = new BoardDto(parent);
+		dto.setTitle("RE:"+dto.getTitle());
+		dto.setContent(null);
+		dto.setWriter(null);
 		model.addAttribute("boardDto", dto);
 		model.addAttribute("boardName", getBoardName(parent.getBoardid()));
 		return "board/reply";
@@ -176,13 +181,9 @@ public String updateForm(@RequestParam int num,@RequestParam String boardid, Mod
 
 //
 	@PostMapping("update")
-	public String update(@Valid @ModelAttribute("boardDto") BoardDto board ,Model model,HttpServletRequest request, BindingResult bresult) {
-
+	public String update(@Valid @ModelAttribute("boardDto") BoardDto board ,BindingResult bresult,Model model,HttpServletRequest request) throws Exception {
+		System.out.println("PostUpdate");
 		if(bresult.hasErrors()) {
-			System.out.println("Validation errors: " + bresult.getAllErrors());
-			model.addAttribute("errors", bresult.getFieldErrors()); // 필드별 오류 메시지
-			model.addAttribute("boardDto", board); // 폼 데이터 유지
-			model.addAttribute("boardid", board.getBoardid()); // boardid 유지
 			return "board/update";
 		}
 		int num = board.getNum();
@@ -208,8 +209,7 @@ public String updateForm(@RequestParam int num,@RequestParam String boardid, Mod
 
 	@PostMapping("delete")
 	public String delete(@ModelAttribute DeleteBoardDto dto, Model model) {
-		System.out.println("등장");
-		System.out.println("dto :: "+dto);
+
 		Board dbBoard = service.getBoard(dto.getNum());
 		if(!dbBoard.getPass().equals(dto.getPass())) {
 			throw new ShopException("비밀번호가틀립니다", "delete?num="+dbBoard.getNum()+
@@ -221,28 +221,28 @@ public String updateForm(@RequestParam int num,@RequestParam String boardid, Mod
 //
 //
 //
-//	@PostMapping("reply")
-//	public String callReply(@Valid Board board, BindingResult bresult,Model model) {
-//		System.out.println("board :: "+board);
-//		String boardid = board.getBoardid();
-//		int num = board.getNum();
-//		if(bresult.hasErrors()) {
-//			model.addAttribute("num",num);
-//			model.addAttribute("boardid",boardid);
-//			return "board/reply";
-//		}
-//		try {
-//			service.boardReply(board);
-//			return "redirect:list?boardid="+boardid;
-//		}
-//		catch (Exception e) {
-//			e.printStackTrace();
-//			model.addAttribute("num",num);
-//			model.addAttribute("boardid",boardid);
-//			String url = "board/reply";
-//			throw new ShopException("오류발생", url);
-//			}
-//	}
+	@PostMapping("reply")
+	public String callReply(@Valid BoardDto board, BindingResult bresult,Model model) {
+		System.out.println("board :: "+board);
+		String boardid = board.getBoardid();
+		int num = board.getNum();
+		System.out.println("boardid"+boardid);
+		System.out.println("num"+num);
+		if(bresult.hasErrors()) {
+			return "board/reply";
+		}
+		try {
+			Board board1 = new Board(board);
+			service.boardReply(board1);
+			return "redirect:list?boardid="+boardid;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			model.addAttribute("boardDto",board);
+			String url = "board/reply";
+			throw new ShopException("오류발생", url);
+			}
+	}
 //
 //	@PostMapping("comment")
 //	public String comment(@Valid @ModelAttribute Comment comm,BindingResult bresult,Model model) {

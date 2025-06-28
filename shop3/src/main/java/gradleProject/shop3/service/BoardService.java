@@ -170,14 +170,18 @@ public class BoardService {
 		int num = dto.getNum();
 		boardRepository.deleteById(num);
 	}
-//	public void boardReply( Board board) {
-//		boardDao.grpStepAdd(board); //이미등록된 grpstep값 1씩 증가
-//		int max = boardDao.maxNum();
-//		board.setNum(++max);
-//		board.setGrplevel(board.getGrplevel()+1);
-//		board.setGrpstep(board.getGrpstep()+1);
-//		boardDao.insert(board);
-//	}
+	public void boardReply( Board board) {
+		int grp = board.getGrp();
+		int grpstep = board.getGrpstep();
+		boardRepository.grpStepAdd(grp,grpstep); //이미등록된 grpstep값 1씩 증가
+		int max = boardRepository.maxNum();
+		board.setNum(++max);
+		board.setGrplevel(board.getGrplevel()+1);
+		board.setGrpstep(board.getGrpstep()+1);
+		boardRepository.save(board);
+	}
+
+
 	public List<Comment> commentList(int num) {
 		return null;
 

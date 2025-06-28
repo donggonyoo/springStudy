@@ -20,4 +20,10 @@ public interface BoardRepository  extends JpaRepository<Board, Integer> , JpaSpe
     @Modifying//쿼리가 데이터를 수정함을 명시.
     @Query("update Board b set b.readcnt = b.readcnt+1 where b.num=:num")
     void addReadcnt(@Param("num") int num);
+
+    @Transactional
+    @Modifying
+    @Query("update Board set grpstep=grpstep+1 "
+            + " where grp=:grp and grpstep > :grpstep")
+    void grpStepAdd(@Param("grp") int grp ,  @Param("grpstep") int grpstep);
 }
