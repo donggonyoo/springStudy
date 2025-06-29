@@ -64,7 +64,12 @@ public class UserService {
 	}
 
 	public void updatePassword(String userid, String chgpass) {
-		userRepository.chgpass(userid, chgpass);
+		System.out.println("updatePw 접근");
+		System.out.println("userid : "+userid);
+		System.out.println("chgpass : "+chgpass);
+		String lowerCase = userid.toLowerCase();
+		int chgpass1 = userRepository.chgpass(lowerCase, chgpass);
+		System.out.println("변경된행수 : "+chgpass1);
 	}
 
 	//

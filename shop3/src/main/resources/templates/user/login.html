@@ -74,7 +74,7 @@
         }
 
         .error-message {
-            color: #ffc9c9;
+            color: #d71111;
             font-size: 0.875rem;
         }
 
@@ -93,7 +93,7 @@
 <div class="container">
     <div class="card p-4">
         <h2 class="page-title text-center">사용자 로그인</h2>
-        <form th:object="${user}" th:action="@{/user/login}" method="post" name="loginform">
+        <form th:object="${userLoginDto}" th:action="@{/user/login}" method="post" name="loginform">
             <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger error-message" role="alert">
                 <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
             </div>
@@ -126,7 +126,7 @@
                 <a th:onclick="|window.open('@{/user/idSearch}', '', 'width=500,height=350,left=50,top=150')|" class="link-custom" href="#">
                     <i class="bi bi-search"></i> 아이디 찾기
                 </a>
-                <a th:onclick="|window.open('@{/user/pwSearch}', '', 'width=500,height=350,left=50,top=150')|" class="link-custom" href="#">
+                <a th:onclick="|window.open('@{/user/pwSearch}', '', 'width=500,height=500,left=50,top=150')|" class="link-custom" href="#">
                     <i class="bi bi-key"></i> 비밀번호 찾기
                 </a>
 

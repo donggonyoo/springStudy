@@ -3,12 +3,15 @@ package gradleProject.shop3.aop;
 //
 
 import gradleProject.shop3.domain.User;
+import gradleProject.shop3.dto.UserDto;
 import gradleProject.shop3.exception.ShopException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.Model;
 
 ///*
 // 1. pointcut : UserController.idCheck 메서드로 시작하고,
@@ -19,10 +22,10 @@ import org.springframework.stereotype.Component;
 @Aspect
 public class UserLoginAspect {
 //
-	@Around("execution(* gradleProject.shop3.controller.User*.idCheck*(..)) && args(..,userid,session)")
-	public Object userIdCheck(ProceedingJoinPoint joinPoint, String userid, HttpSession session) throws Throwable {
-		User loginUser = (User)session.getAttribute("loginUser");
-		if(loginUser == null || !(loginUser instanceof User)) { // 로그 아웃상태
+	@Around("execution(* gradleProject.shop3.controller.User*.idCheck*(..)) && args(..,userid,model,request)")
+	public Object userIdCheck(ProceedingJoinPoint joinPoint, String userid, Model model, HttpServletRequest request) throws Throwable {
+		UserDto loginUser = (UserDto)request.getSession().getAttribute("loginUser");
+		if(loginUser == null || !(loginUser instanceof UserDto)) { // 로그 아웃상태
 			throw new ShopException("[idCheck]로그인이 필요합니다", "login");
 		}
 		if(!loginUser.getUserid().equals("admin") && !loginUser.getUserid().equals(userid)) {

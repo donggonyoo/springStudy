@@ -19,8 +19,8 @@ public interface UserRepository extends JpaRepository<User,String> {
     @Transactional
     @Modifying
     @Query
-    ("update Usercipher u set u.password=:chgpass where u.userid = :userid")
-    void chgpass(@Param("userid") String userid ,
+    ("update Usercipher u set u.password= :chgpass where u.userid = :userid")
+    int chgpass(@Param("userid") String userid ,
                  @Param("chgpass") String chgpass);
 
     @Query("select u from Usercipher u  where u.phoneno = :phoneno")

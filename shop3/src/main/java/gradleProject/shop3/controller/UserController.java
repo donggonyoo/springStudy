@@ -1,10 +1,15 @@
 package gradleProject.shop3.controller;
 
+import ch.qos.logback.core.LogbackException;
 import gradleProject.shop3.domain.Sale;
 import gradleProject.shop3.domain.SaleItem;
 import gradleProject.shop3.domain.User;
+import gradleProject.shop3.dto.PwSearchDto;
 import gradleProject.shop3.dto.UserDto;
+import gradleProject.shop3.dto.UserLoginDto;
+import gradleProject.shop3.exception.LogoutException;
 import gradleProject.shop3.exception.ShopException;
+import gradleProject.shop3.mapper.PwSearchMapper;
 import gradleProject.shop3.mapper.UserMapper;
 import gradleProject.shop3.service.ShopService;
 import gradleProject.shop3.service.UserService;
@@ -12,6 +17,7 @@ import gradleProject.shop3.util.CipherUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,15 +40,13 @@ import java.util.List;
 
 @Controller
 @RequestMapping("user")
+@RequiredArgsConstructor //final이 붙은 필드로생성자를만듬(autoWired주입 필요X)
 public class UserController {
 
-    @Autowired
-    private UserService service;
-
-    @Autowired
-    private UserMapper userMapper;
-	@Autowired
-	private ShopService shopService;
+    private final UserService service;
+    private final UserMapper userMapper;
+	private final ShopService shopService;
+    private final PwSearchMapper pwSearchMapper;
 
     // BoardController 의존성 제거 (필요 없는 경우)
     /*
@@ -101,6 +105,8 @@ public class UserController {
 
             User user = userMapper.toEntity(userDto);
 
+
+
             service.userInsert(user);
         } catch (DataIntegrityViolationException e) { // 키값 중복된 경우 (아이디 중복)
             e.printStackTrace();
@@ -130,7 +136,7 @@ public class UserController {
         apiURL += "&client_id="+clientId;
         apiURL += "&redirect_uri="+redirectURL;
         apiURL += "&state=" + state;
-        model.addAttribute(new User());
+        model.addAttribute("userLoginDto",new UserLoginDto());
         model.addAttribute("apiURL",apiURL);
         session.getServletContext().setAttribute("state", state);
         session.getServletContext().setAttribute("session", session);
@@ -266,7 +272,7 @@ public class UserController {
     }
 
     @PostMapping("login")
-    public String login(User user, BindingResult bresult, Model model, HttpSession session) throws Exception {
+    public String login(UserLoginDto user, BindingResult bresult, Model model, HttpSession session) throws Exception {
         model.addAttribute("title", "로그인"); // 페이지 제목 설정
 
         // 사용자 ID 및 비밀번호 길이 검증
@@ -282,16 +288,18 @@ public class UserController {
             return "user/login"; // 오류 발생 시 다시 user/login 뷰로
         }
 
-		User dbUser = service.selectUser(user.getUserid());
-        System.out.println("DBUser : "+dbUser);
+        User dbUser = service.selectUser(user.getUserid());
+        System.out.println("DbUser : "+dbUser);
 		if(dbUser == null) { // 아이디 없음
 			bresult.reject("error.login.id", "존재하지 않는 아이디입니다.");
 			return "user/login";
 		}
 
 		if(CipherUtil.makehash(user.getPassword()).equalsIgnoreCase(dbUser.getPassword())) { // 비밀번호 일치
-            user = emailDecrypt(dbUser);
-            session.setAttribute("loginUser", user);
+            User dbUser1 = emailDecrypt(dbUser); //mypage에 email을 복호화해 올리기위함
+            
+            UserDto dto = userMapper.toDto(dbUser1);//로그인정보가 다 있는 UserDto를 세션으로등록
+            session.setAttribute("loginUser", dto);
 			return "redirect:/user/mypage?userid=" + user.getUserid(); // 마이페이지로 리다이렉트 (절대 경로)
 		}
         else { // 비밀번호 불일치
@@ -301,7 +309,7 @@ public class UserController {
 	}
 
 	@RequestMapping("mypage")
-	public String idCheckMypage( Model model,@RequestParam("userid") String userid,HttpSession session) throws Exception {
+	public String idCheckMypage( @RequestParam("userid") String userid,Model model,HttpServletRequest request) throws Exception {
 		model.addAttribute("title", "내 정보"); // 페이지 제목 설정
 
         System.out.println("userid : "+userid);
@@ -362,7 +370,7 @@ public class UserController {
 	}
 //
 	@PostMapping("update")
-	public String idCheckUpdate(@Valid UserDto dto, BindingResult bresult, Model model, HttpSession session) throws Exception {
+	public String idCheckUpdate(@Valid UserDto dto, BindingResult bresult, Model model, HttpServletRequest request) throws Exception {
 		model.addAttribute("title", "정보 수정"); // 페이지 제목 설정
         System.out.println("dto ::  "+dto);
 
@@ -372,7 +380,7 @@ public class UserController {
 		}
 
 		// 비밀번호 검증
-		User loginUser = (User) session.getAttribute("loginUser");
+		User loginUser = (User) request.getSession().getAttribute("loginUser");
 		if(!CipherUtil.makehash(dto.getPassword()).equalsIgnoreCase(loginUser.getPassword())) {
 			bresult.reject("error.login.password", "비밀번호가 일치하지 않습니다.");
 			return "user/update";
@@ -384,7 +392,7 @@ public class UserController {
             user1.setPassword(CipherUtil.makehash(dto.getPassword()));
             service.userUpdate(user1);
 			if(loginUser.getUserid().equals(user.getUserid())) {
-				session.setAttribute("loginUser", user1); // 수정된 정보로 세션 업데이트
+				request.getSession().setAttribute("loginUser", user1); // 수정된 정보로 세션 업데이트
 			}
 			return "redirect:/user/mypage?userid=" + user1.getUserid(); // 마이페이지로 리다이렉트 (절대 경로)
 		} catch (Exception e) {
@@ -441,7 +449,7 @@ public class UserController {
 									 Model model, HttpSession session) throws Exception {
 		model.addAttribute("title", "비밀번호 변경"); // 페이지 제목 설정
 
-		User loginUser = (User) session.getAttribute("loginUser");
+		UserDto loginUser = (UserDto) session.getAttribute("loginUser");
 
 		if (loginUser == null) {
 			throw new ShopException("로그인 후 이용해 주세요.", "/user/login");
@@ -453,7 +461,7 @@ public class UserController {
 		}
 
 		try {
-            String makehash = CipherUtil.makehash(chgpass);
+            String makehash = CipherUtil.makehash(chgpass);//변경할비번 암호화
             service.updatePassword(loginUser.getUserid(), makehash); // 서비스 호출
 			loginUser.setPassword(makehash); // 세션에 저장된 사용자 정보 업데이트
 		} catch (Exception e) {
@@ -461,7 +469,8 @@ public class UserController {
 			throw new ShopException("비밀번호 변경 중 오류가 발생했습니다.", "/user/password");
 		}
 
-		return "redirect:/user/mypage?userid=" + loginUser.getUserid(); // 마이페이지로 리다이렉트 (절대 경로)
+        throw new LogoutException("비밀번호변경 성공 다시로그인하세요","/user/logout");
+
 	}
     @GetMapping("idSearch")
     public String idSearchForm(Model model) {
@@ -473,7 +482,7 @@ public class UserController {
     // 2. 비밀번호 찾기 페이지 (GET)
     @GetMapping("pwSearch")
     public String pwSearchForm(Model model) {
-        model.addAttribute("userDto", new UserDto()); // 폼 바인딩을 위한 빈 User 객체
+        model.addAttribute("pwSearchDto", new PwSearchDto()); // 폼 바인딩을 위한 빈 User 객체
         model.addAttribute("title", "비밀번호 찾기");
         return "user/pwSearch"; // templates/user/pwSearch.html 파일을 반환
     }
@@ -501,25 +510,24 @@ public class UserController {
 
     // 4. 비밀번호 찾기 처리 (POST)
     @PostMapping("pwSearch")
-    public String pwSearch(@ModelAttribute UserDto user, BindingResult bresult, Model model) throws Exception {
+    public String pwSearch(@Valid @ModelAttribute PwSearchDto user, BindingResult bresult, Model model) throws Exception {
 
         model.addAttribute("title", "비밀번호 찾기");
 
-        if (!StringUtils.hasText(user.getUserid()) || !StringUtils.hasText(user.getEmail()) || !StringUtils.hasText(user.getPhoneno())) {
-            bresult.reject("error.input.check", "모든 값을 입력해주세요.");
+        if(bresult.hasErrors()){
             return "user/pwSearch";
         }
+        User user1 = pwSearchMapper.toEntiy(user);
+        String resultPw = service.getSearch(user1); // 먼저 해당 정보로 사용자가 있는지 확인
 
-        User user1 = new User(user);
-        String resultId = service.getSearch(user1); // 먼저 해당 정보로 사용자가 있는지 확인
 
-        if (resultId == null) {
+        if (resultPw == null) {
             model.addAttribute("result", "입력하신 정보와 일치하는 사용자가 없습니다.");
             bresult.reject("error.search", "User not found"); // Thymeleaf에서 에러 스타일링을 위해
         } else {
             String newPassword = generateRandomPassword();
             // 중요: 새로 생성된 비밀번호도 반드시 해시 처리하여 저장해야 합니다.
-            service.updatePassword(resultId,CipherUtil.makehash(newPassword));
+            service.updatePassword(user.getUserid(),CipherUtil.makehash(newPassword));
             model.addAttribute("result", "임시 비밀번호가 발급되었습니다: [ " + newPassword + " ] 로그인 후 바로 변경해주세요.");
         }
         return "user/pwSearch"; // 결과를 포함하여 다시 비밀번호 찾기 페이지를 보여줌

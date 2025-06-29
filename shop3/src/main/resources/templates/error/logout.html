@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title} ?: '로그아웃'">로그아웃</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Font Awesome의 아이콘사용을위해 가져와-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        body {
+           /* background: url('https://i.pinimg.com/736x/1b/ac/fc/1bacfc3f93684972becf9931d0a24874.jpg') no-repeat center center fixed;*/
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+        }
+
+        .error-card {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 0 20px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+
+        .error-card h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .error-card p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .btn-home {
+            background-color: #ffebcc;
+            border: none;
+        }
+
+        .btn-home:hover {
+            background-color: #ff3f3f;
+        }
+    </style>
+</head>
+<body>
+<div class="error-card">
+    <i class="fa-solid fa-check" style="color: #63E6BE;"></i>
+    <h1>로그인페이지로 이동</h1>
+    <!-- GlobalExceptionHandler에서 전달된 메시지를 여기에 표시 -->
+    <p th:text="${message} ?: '죄송합니다. 요청하신 페이지를 처리하는 중에 오류가 발생했습니다.'">
+        죄송합니다. 요청하신 페이지를 처리하는 중에 오류가 발생했습니다.
+    </p>
+    <!-- GlobalExceptionHandler에서 전달된 redirectUrl로 이동하는 버튼 -->
+    <a th:href="${redirectUrl} ?: @{/}" class="btn btn-home btn-lg text-white">
+        <i class="fa-solid fa-house-chimney" style="color: #63E6BE;"></i>
+        <!-- redirectUrl이 있으면 '돌아가기', 없으면 '홈으로 돌아가기' -->
+        <span th:text="${redirectUrl} ? '돌아가기' : '홈으로 돌아가기'">홈으로 돌아가기</span>
+    </a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -3,6 +3,7 @@
 
     package gradleProject.shop3.config;
 
+    import gradleProject.shop3.exception.LogoutException;
     import gradleProject.shop3.exception.ShopException;
     import org.springframework.ui.Model;
     import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -19,6 +20,13 @@
 
             // 파일이 'templates/error/error.html'에 있으므로, 'error/error'를 반환합니다.
             return "error/error";
+        }
+        @ExceptionHandler(LogoutException.class)
+        public String handleLogoutException(LogoutException e, Model model) {
+            model.addAttribute("message", e.getMessage());
+            model.addAttribute("redirectUrl", e.getUrl());
+            model.addAttribute("title", "로그아웃"); // 에러 페이지의 타이틀 설정 (선택 사항)
+            return "error/logout";
         }
     }
 
