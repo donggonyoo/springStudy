@@ -1,9 +1,15 @@
 package gradleProject.shop3.dto.board;
 
 import jakarta.validation.constraints.NotEmpty;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.util.Date;
 
+@Getter
+@Setter
+@ToString
 public class CommentDto {
     private int num;
     private int seq;

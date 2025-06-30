@@ -90,10 +90,11 @@
                             <div class="d-flex justify-content-between">
                                 <div>
                                     <span class="fw-bold" th:text="${c.writer}"></span>
-                                    <small class="text-muted ms-2" th:replace="~{fragments/formatDate :: formatDate(${c.regdate}, 'yyyy-MM-dd HH:mm:ss E요일')}"></small>
+                                    <span th:text="${c.seq}"></span>
+                                    <span th:text="${c.regdate}"></span>
                                 </div>
                                 <!-- 댓글 삭제 폼 -->
-                                <form th:action="@{/board/commdel}" method="post" th:object="${comment}" class="d-flex">
+                                <form th:action="@{/board/commdel}" method="post" th:object="${commentDto}" class="d-flex">
                                     <input type="hidden" name="num" th:value="${c.num}">
                                     <input type="hidden" name="seq" th:value="${c.seq}">
                                     <input type="password" th:field="*{pass}" class="form-control form-control-sm me-1" placeholder="비밀번호" style="width: 120px;">
@@ -111,21 +112,21 @@
             <!-- 댓글 작성 폼 -->
             <div class="comment-form mt-4">
                 <h6 class="mb-3">댓글 작성</h6>
-                <form th:object="${comment}" th:action="@{/board/comment}" method="post">
+                <form th:object="${commentDto}" th:action="@{/board/comment}" method="post">
                     <input type="hidden" name="num" th:value="${board?.num}"/>
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
                     <div class="row g-2 mb-2">
                         <div class="col-md">
-                            <input th:field="*{writer}" class="form-control p-2" placeholder="작성자" />
-                            <div class="text-red-500 text-sm mt-1" th:errors="*{writer}"></div>
+                            <input th:field="*{writer}" class="form-control p-2" placeholder="작성자" onkeyup="delError()"/>
+                            <div class="err" th:errors="*{writer}" style="color: red"></div>
                         </div>
                         <div class="col-md">
-                            <input type="password" th:field="*{pass}" class="form-control p-2" placeholder="비밀번호" />
-                            <div class="text-red-500 text-sm mt-1" th:errors="*{pass}"></div>
+                            <input type="password" th:field="*{pass}" class="form-control p-2" placeholder="비밀번호" onkeyup="delError()"/>
+                            <div class="err" th:errors="*{pass}" style="color: red"></div>
                         </div>
                     </div>
-                    <textarea th:field="*{content}" rows="4" id="summernote" class="form-control p-2"></textarea>
-                    <div class="text-red-500 text-sm mt-1" th:errors="*{content}"></div>
+                    <textarea th:field="*{content}" rows="4" id="summernote" class="form-control p-2" onkeyup="delError()"></textarea>
+                    <div class="err" th:errors="*{content}" style="color: red"></div>
                     <button type="submit" class="btn btn-primary mt-2">댓글 등록</button>
                 </form>
             </div>
@@ -167,6 +168,12 @@
                 alert("이미지 업로드 실패: " + e.status);
             }
         });
+    }
+    function delError(){
+        let ele = document.querySelectorAll(".err");
+        ele.forEach(ele=>{
+            ele.style.display = "none";
+        })
     }
 </script>
 </body>

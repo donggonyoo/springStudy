@@ -3,8 +3,10 @@ package gradleProject.shop3.controller;
 import gradleProject.shop3.domain.Board;
 import gradleProject.shop3.domain.Comment;
 import gradleProject.shop3.dto.board.BoardDto;
+import gradleProject.shop3.dto.board.CommentDto;
 import gradleProject.shop3.dto.board.DeleteBoardDto;
 import gradleProject.shop3.exception.ShopException;
+import gradleProject.shop3.mapper.CommentMapper;
 import gradleProject.shop3.service.BoardService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -19,9 +21,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-
 import java.util.List;
-import java.util.Map;
+
 
 
 @Controller
@@ -31,12 +32,11 @@ public class BoardController {
 
     private final ItemController itemController;
     private final UserController userController;
+	private final CommentMapper commentMapper;
 
 	@Autowired
 	private BoardService service;
 
-
-	
 //	@GetMapping("*")
 //	public ModelAndView write() {
 //		ModelAndView mav = new ModelAndView();
@@ -113,10 +113,11 @@ public class BoardController {
 		BoardDto boardDto = new BoardDto(board);
 		System.out.println("boardDTo : "+boardDto);
 		comm.setNum(num);
+		CommentDto dto = commentMapper.toDto(comm);
 		model.addAttribute("board",boardDto);
 		model.addAttribute("boardName",boardName);
 		model.addAttribute("commlist",commlist);
-		model.addAttribute("comment",comm);
+		model.addAttribute("commentDto",dto);
 		return "board/detail";
 	}
 
@@ -152,6 +153,7 @@ public String updateForm(@RequestParam int num,@RequestParam String boardid, Mod
 	model.addAttribute("boardid", boardid);
 	return "board/update";
 }
+
 	@GetMapping("delete")
 	public String deleteForm(@RequestParam int num,@RequestParam String boardid, Model model) {
 		Board board = service.getBoard(num);
@@ -179,7 +181,6 @@ public String updateForm(@RequestParam int num,@RequestParam String boardid, Mod
 		return "board/reply";
 	}
 
-//
 	@PostMapping("update")
 	public String update(@Valid @ModelAttribute("boardDto") BoardDto board ,BindingResult bresult,Model model,HttpServletRequest request) throws Exception {
 		System.out.println("PostUpdate");
@@ -218,9 +219,7 @@ public String updateForm(@RequestParam int num,@RequestParam String boardid, Mod
 		service.boardDelete(dto);
 		return "redirect:list?boardid="+dbBoard.getBoardid();
 	}
-//
-//
-//
+
 	@PostMapping("reply")
 	public String callReply(@Valid BoardDto board, BindingResult bresult,Model model) {
 		System.out.println("board :: "+board);
@@ -243,55 +242,59 @@ public String updateForm(@RequestParam int num,@RequestParam String boardid, Mod
 			throw new ShopException("오류발생", url);
 			}
 	}
-//
-//	@PostMapping("comment")
-//	public String comment(@Valid @ModelAttribute Comment comm,BindingResult bresult,Model model) {
-//		if(bresult.hasErrors()) {
-//			return commDetail(comm, model);
-//		}
-//		//comment테이블의 기본키값 , num,seq
-//		int seq = service.comMaxSeq(comm.getNum());
-//		comm.setSeq(++seq);
-//		service.comInsert(comm);
-//		return "redirect:detail?num="+comm.getNum()+"#comment";
-//		//#comment : id속성값이 comment위치로 시작
-//	}
-//
-//	private String commDetail(Comment comm,Model model) {
-//		int num = comm.getNum();
-//		Board board = service.getBoard(num);
-//		String boardName = null;
-//		String boardid = board.getBoardid();
-//		if(boardid==null) {
-//			boardid="1";
-//		}
-//		switch(board.getBoardid()) {
-//		   case "1" -> boardName = "공지사항";
-//		   case "2" -> boardName = "자유게시판";
-//		   case "3" -> boardName = "Q&A";
-//		}
-//		//댓글목록 화면에전달
-//		List<Comment> commlist = service.commentList(num);
-//		comm.setNum(num);
-//
-//		model.addAttribute("board",board);
-//		model.addAttribute("boardName",boardName);
-//		model.addAttribute("commlist",commlist);
-//		model.addAttribute("comment",comm);
-//		return "board/detail";
-//	}
-//
-//	@PostMapping("commdel")
-//	public String comment(@ModelAttribute Comment comm,Model model) {
-//		Comment dbComm = service.commSelectOne(comm.getNum(),comm.getSeq());
-//		if(comm.getPass().equals(dbComm.getPass())) {
-//			service.commDel(comm.getNum(),comm.getSeq());
-//		}
-//		else {
-//			throw new ShopException("댓글삭제실패", "detail?num="+comm.getNum()+"#comment");
-//		}
-//		return "redirect:detail?num="+comm.getNum()+"#comment";
-//	}
+
+	@PostMapping("comment")
+	public String comment(@Valid @ModelAttribute CommentDto comm, BindingResult bresult, Model model) {
+		if(bresult.hasErrors()) {
+			return commDetail(comm, model);
+		}
+		//comment테이블의 기본키값 , num,seq
+		int seq = service.comMaxSeq(comm.getNum());
+		comm.setSeq(++seq);
+		Comment entity = commentMapper.toEntity(comm);//dto->domain
+		service.comInsert(entity);
+		return "redirect:detail?num="+comm.getNum()+"#comment";
+		//#comment : id속성값이 comment위치로 시작
+	}
+
+
+	private String commDetail(CommentDto comm,Model model) {
+		int num = comm.getNum();
+		Board board = service.getBoard(num);
+		String boardName = null;
+		String boardid = board.getBoardid();
+		if(boardid==null) {
+			boardid="1";
+		}
+		switch(board.getBoardid()) {
+		   case "1" -> boardName = "공지사항";
+		   case "2" -> boardName = "자유게시판";
+		   case "3" -> boardName = "Q&A";
+		}
+		//댓글목록 화면에전달
+		List<Comment> commlist = service.commentList(num);
+		comm.setNum(num);
+		System.out.println("com :: "+comm);
+
+		model.addAttribute("board",board);
+		model.addAttribute("boardName",boardName);
+		model.addAttribute("commlist",commlist);
+		model.addAttribute("commentDto",comm);
+		return "board/detail";
+	}
+
+
+	@PostMapping("commdel")
+	public String comment(@ModelAttribute CommentDto comm,Model model) {
+		Comment dbComm = service.commSelectOne(comm.getNum(),comm.getSeq());
+		if(comm.getPass().equals(dbComm.getPass())) {
+			service.commDel(comm.getNum(),comm.getSeq());
+		}
+		else {
+			throw new ShopException("댓글삭제실패", "detail?num="+comm.getNum()+"#comment");
+		}
+		return "redirect:detail?num="+comm.getNum()+"#comment";
+	}
 	
 	
 }

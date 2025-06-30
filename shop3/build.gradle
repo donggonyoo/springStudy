@@ -13,6 +13,9 @@ java {
 		languageVersion = JavaLanguageVersion.of(17)
 	}
 }
+bootRun {
+	environment "SUMMERNOTE_IMGUPLOAD", "D:/dongGit/springStudy/shop3/src/main/resources/static/"
+}
 
 configurations {
 	compileOnly {
@@ -27,6 +30,9 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-web-services'
+
+	// https://mvnrepository.com/artifact/org.jsoup/jsoup
+	implementation("org.jsoup:jsoup:1.15.3")
 
 	// Valid
 	implementation 'org.springframework.boot:spring-boot-starter-validation'

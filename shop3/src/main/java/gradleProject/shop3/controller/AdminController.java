@@ -28,6 +28,10 @@ public class AdminController {
 
 
 
+	@GetMapping("dashboard")
+	public String dashboard() {
+		return null;
+	}
 	
 	@GetMapping("/list")
 	public String callList(Model model,HttpSession session) throws Exception {
