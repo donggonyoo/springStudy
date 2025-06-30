@@ -98,7 +98,7 @@ public class BoardService {
 	public Page<Board> boardlist
 	(Integer pageNum, int limit, String boardid, String searchtype, String searchcontent) {
 		Specification<Board> spec = ((root, query, cri) ->
-				cri.equal(root.get("boardid"), boardid));
+				cri.equal(root.get("boardid"), boardid)); //select * from board where boardid = :boardid
 		if (searchtype != null) {
 			if(searchtype.equals("title")) {
 				spec = spec.and(((root, query, cri) ->
@@ -124,14 +124,17 @@ public class BoardService {
 
 		return boardRepository.findAll(spec, pageable);
 	}
+
 	public Board getBoard(int num) {
 		return boardRepository.findById(num).orElse(null);
 
 	}
+
 	public void addReadcnt(int num) {
 		boardRepository.addReadcnt(num);
 
 	}
+
 	public void boardWrite(BoardDto dto, HttpServletRequest request) {
 		int maxNum = boardRepository.maxNum();
 		dto.setNum(++maxNum);

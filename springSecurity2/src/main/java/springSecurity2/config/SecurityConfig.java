@@ -15,6 +15,8 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 public class SecurityConfig {
     @Bean
     public HttpSessionEventPublisher httpSessionEventPublisher() {
+        //HttpSessionEventPublisher 빈을 등록하여
+        // 세션 생성/소멸 이벤트를 Spring Security가 감지
         return new HttpSessionEventPublisher();
     }
 
@@ -30,19 +32,23 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests((auth)->auth
                 .requestMatchers("/","/login","/home").permitAll() //home은 누구나 접근가능하다
-                .requestMatchers("/admin").hasRole("ADMIN")//사용자가 **"ADMIN" 역할(Role)**을 가져야함
+                .requestMatchers("/admin").hasRole("ADMIN")
+                //UserEntity에서 role 필드가 "ADMIN"으로 설정되어 있어야 하며, UserDetails 객체에 이 역할이 반영되어야 합니다.
+
                 .requestMatchers("/my/*").hasAnyRole("ADMIN","USER")//'ADMIN' or 'USER' 권한을 가져야함
                 .anyRequest().authenticated());
 
         //커스텀로그인
         //loginPage("/login")로 인해 인증되지 않은 사용자가 보호된 URL에 접근하면 /login으로 리다이렉트됩니다.
         http.formLogin((a)->a.loginPage("/login") //로그인요청
-        .loginProcessingUrl("/loginProc").permitAll()); //로그인 form의 action값
+        .loginProcessingUrl("/loginProc").permitAll()); //"/loginProc" : 로그인 form의 action값
 
-        http.logout((a)->a.logoutUrl("/logout")
+        http.logout((a)->a.logoutUrl("/logout")//logout이라는 요청이들어오면?
                 .logoutSuccessUrl("/login") //성공시 login 페이지로
                 .invalidateHttpSession(true)//세션초기화
-                .deleteCookies("JSESSIONID")//JSESSIONID(session)삭제
+
+                //JSESSIONID(session)삭제 (세션을 등록하면 cookie에 JSESSIONID라느 이름으로 만들어짐)
+                .deleteCookies("JSESSIONID")
                 .permitAll());//누구나 접근가능
         return http.build();
     }
@@ -51,7 +57,4 @@ public class SecurityConfig {
     public BCryptPasswordEncoder bcryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    @Bean
-    public BCrypt bcrypt() {return  new BCrypt();}
 }

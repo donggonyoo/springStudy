@@ -50,7 +50,7 @@ public class BoardController {
 	 * 
 	 * @RequestParam : 파라미터값을 Map 객체에 매핑하여 전달
 	 */
-	@RequestMapping("list")
+	@GetMapping("list")
 	public String list(@RequestParam(value="boardid", defaultValue = "1") String boardid,
 					   @RequestParam(value="pageNum", defaultValue = "1") Integer pageNum,
 					   @RequestParam(value="searchtype", required = false) String searchtype,
