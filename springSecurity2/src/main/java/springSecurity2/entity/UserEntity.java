@@ -19,7 +19,9 @@ public class UserEntity {
     //새로운 UserEntity를 저장할 때 데이터베이스가 id에 다음 순차적 정수 값을 자동 할당합니다(예: 1, 2, 3, ...).
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private String firstName;
+    private String username;
     private String password;
+    
+    //권한이라고생각하면됨
     private String role;
 }

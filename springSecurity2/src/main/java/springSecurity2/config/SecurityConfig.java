@@ -31,7 +31,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests((auth)->auth
-                .requestMatchers("/","/login","/home").permitAll() //home은 누구나 접근가능하다
+                .requestMatchers("/","/login","/home","/join","/joinProc").permitAll() //home은 누구나 접근가능하다
                 .requestMatchers("/admin").hasRole("ADMIN")
                 //UserEntity에서 role 필드가 "ADMIN"으로 설정되어 있어야 하며, UserDetails 객체에 이 역할이 반영되어야 합니다.
 
@@ -46,10 +46,13 @@ public class SecurityConfig {
         http.logout((a)->a.logoutUrl("/logout")//logout이라는 요청이들어오면?
                 .logoutSuccessUrl("/login") //성공시 login 페이지로
                 .invalidateHttpSession(true)//세션초기화
-
-                //JSESSIONID(session)삭제 (세션을 등록하면 cookie에 JSESSIONID라느 이름으로 만들어짐)
+                //쿠키 삭제 (세션을 등록하면 cookie에 JSESSIONID라는 이름으로 만들어짐)
                 .deleteCookies("JSESSIONID")
                 .permitAll());//누구나 접근가능
+
+        /*CSRF공격을 해제하라는 의미 , springSecurity는 기본적으로 POST,PUT,DELETE 요청시에는 CSRF토큰 요구*/
+        //세션기반 인증시에는 활성화하는 것이 안전함
+       /* http.csrf((a)->a.disable());*/
         return http.build();
     }
 
