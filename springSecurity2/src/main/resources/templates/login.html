@@ -6,7 +6,7 @@
 </head>
 <body>
 <h3>로그인페이지</h3>
-<form action="/loginProc" method="post" name="loginForm">
+<form th:action="@{loginProc}" method="post" name="loginForm">
     <input type="text" name="username" placeholder="id입력하세요" style="height: 70px; width: 200px; font-size: 20px" /><br>
     <input type="password" name="password" placeholder="pw입력하세요" style="height: 70px; width: 200px; font-size: 20px"/><br>
     <input type="submit" value="login" style="height: 70px; width: 100px;"/>

@@ -2,6 +2,9 @@ package springSecurity2.controller;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import springSecurity2.dto.JoinDto;
 import springSecurity2.service.LoginService;
+
+import java.util.Collection;
+import java.util.Iterator;
 
 @Controller
 @RequestMapping("/")
@@ -31,7 +37,16 @@ public class HomeController {
 
     @GetMapping("my")
     public String my(Model model) {
-        model.addAttribute("msg","my");
+        String id = SecurityContextHolder.getContext().getAuthentication().getName();
+        //인증정보조회 : 사용자정보,권한정보
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        //권한목록조회
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        //권한을 순회
+        Iterator<? extends GrantedAuthority> iter = authorities.iterator();
+        GrantedAuthority auth = iter.next();//등록된 권한 조회
+        String role = auth.getAuthority();//권한이름 반환
+        model.addAttribute("msg","/my로 접근 : id="+id+" \n\n role : "+role);
         return "home";
     }
 

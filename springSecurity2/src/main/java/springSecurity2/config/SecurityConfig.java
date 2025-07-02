@@ -41,7 +41,13 @@ public class SecurityConfig {
         //커스텀로그인
         //loginPage("/login")로 인해 인증되지 않은 사용자가 보호된 URL에 접근하면 /login으로 리다이렉트됩니다.
         http.formLogin((a)->a.loginPage("/login") //로그인요청
-        .loginProcessingUrl("/loginProc").permitAll()); //"/loginProc" : 로그인 form의 action값
+        .loginProcessingUrl("/loginProc")//"/loginProc" : 로그인 form의 action값
+         .defaultSuccessUrl("/my",true) //로그인성공 시 호출
+                /*
+                true : 무조건my페이지요청
+                false : 로그인 전에 요청하던 페이지가있는 경우 해당페이지로감 그 외는 /my
+                 */
+                .permitAll()); 
 
         http.logout((a)->a.logoutUrl("/logout")//logout이라는 요청이들어오면?
                 .logoutSuccessUrl("/login") //성공시 login 페이지로
@@ -50,9 +56,16 @@ public class SecurityConfig {
                 .deleteCookies("JSESSIONID")
                 .permitAll());//누구나 접근가능
 
+        http.sessionManagement((auth)->{
+            auth.sessionFixation()//사용자가 로그인할 때 기존 세션 ID를 유지하지 않고 새로운 세션 ID를 발급하도록 설정합니다.
+                    .changeSessionId()
+                    .maximumSessions(1)//id별 session 수를 1개로 제한(중복 로그인 방지)
+                    .maxSessionsPreventsLogin(true);
+        });
+
         /*CSRF공격을 해제하라는 의미 , springSecurity는 기본적으로 POST,PUT,DELETE 요청시에는 CSRF토큰 요구*/
         //세션기반 인증시에는 활성화하는 것이 안전함
-       /* http.csrf((a)->a.disable());*/
+      http.csrf((auth)->auth.disable());
         return http.build();
     }
 

@@ -13,6 +13,7 @@ public class CustomUserDetails implements UserDetails {
     //DB 사용자 정보
     public UserEntity userEntity;
 
+
     public CustomUserDetails(UserEntity userEntity) {
         this.userEntity = userEntity;
     }

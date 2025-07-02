@@ -1,10 +1,7 @@
 package springSecurity2.entity;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -19,6 +16,7 @@ public class UserEntity {
     //새로운 UserEntity를 저장할 때 데이터베이스가 id에 다음 순차적 정수 값을 자동 할당합니다(예: 1, 2, 3, ...).
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @Column(unique = true) //중복방지
     private String username;
     private String password;
     
