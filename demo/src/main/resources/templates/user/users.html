@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>User Management</title>
+</head>
+<body>
+<form th:action="@{/user/users}" method="post">
+    <input type="text" name="postUserId" placeholder="Enter User ID">
+    <button type="submit">Post</button>
+</form>
+
+<form  th:action="@{/user/users}" method="post">
+    <input type="hidden" name="_method" value="DELETE">
+    <input type="text" name="deleteUserId" placeholder="Enter User ID to Delete">
+    <button type="submit">Delete</button>
+</form>
+
+<h2>Users List</h2>
+<ul>
+    <li th:each="user : ${users}" th:text="${user.userId}"></li>
+</ul>
+</body>
+</html>
