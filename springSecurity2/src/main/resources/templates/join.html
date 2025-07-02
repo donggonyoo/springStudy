@@ -14,7 +14,7 @@ Spring Security의 CSRF 요구사항이 충족되어 요청이 정상적으로 �
 -->
 <h3>JOIN FORM</h3>
 <form th:action="@{/joinProc}" method="post" name="joinForm">
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <!--<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>-->
     <input type="text" name="username" placeholder="ID"/><br>
     <input type="password" name="password" placeholder="PW"/><br>
     <input type="submit" value="JOIN"/>

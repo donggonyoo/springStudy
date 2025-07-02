@@ -5,10 +5,29 @@
     <title>User Management</title>
 </head>
 <body>
-<form th:action="@{/user/users}" method="post">
-    <input type="text" name="postUserId" placeholder="Enter User ID">
-    <button type="submit">Post</button>
-</form>
+
+    <table>
+        <th>아이디</th>
+        <th>이름</th>
+        <tr th:each="user : ${users}">
+            <form th:action="@{/user/users}" method="get">
+            <td th:text="${user?.userId ?: 'N/A'}" ></td>
+            <td th:text="${user?.userName ?: 'N/A'}" ></td>
+                <input type="hidden" name="userId" th:value="${user?.userId ?: 'N/A'}" />
+            <td><button>클릭</button></td>
+            </form>
+        </tr>
+    </table>
+
+
+
+<div id="userUpdate">
+    <form  th:action="@{/user/users}" method="post">
+        <input type="hidden" name="_method" value="PUT">
+        <input type="text" name="updateUserId"  placeholder="Enter User ID to Update">
+        <button type="submit">Update</button>
+    </form>
+</div>
 
 <form  th:action="@{/user/users}" method="post">
     <input type="hidden" name="_method" value="DELETE">
@@ -16,9 +35,5 @@
     <button type="submit">Delete</button>
 </form>
 
-<h2>Users List</h2>
-<ul>
-    <li th:each="user : ${users}" th:text="${user.userId}"></li>
-</ul>
 </body>
 </html>
