@@ -74,4 +74,9 @@ public class HomeController {
         loginService.joinProcess(joinDto);
         return "redirect:/login";
     }
+    @RequestMapping("accessDenied")
+    public String accessDenied(Model model) {
+        model.addAttribute("msg","권한이부족합니다");
+        return "accessDenied";
+    }
 }

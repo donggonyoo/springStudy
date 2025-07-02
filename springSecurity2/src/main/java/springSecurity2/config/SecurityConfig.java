@@ -41,13 +41,21 @@ public class SecurityConfig {
         //커스텀로그인
         //loginPage("/login")로 인해 인증되지 않은 사용자가 보호된 URL에 접근하면 /login으로 리다이렉트됩니다.
         http.formLogin((a)->a.loginPage("/login") //로그인요청
-        .loginProcessingUrl("/loginProc")//"/loginProc" : 로그인 form의 action값
+        .loginProcessingUrl("/loginProc")
+                /* /loginProc으로 요청이들어오면 security가 이를 가로채 로그인처리 시작
+                    이 과정에서 UserDetailsService의 구현체가 자동으로 호출 됨
+                 */
          .defaultSuccessUrl("/my",true) //로그인성공 시 호출
                 /*
+                (로그인성공의 기준 : 권한 과 userDetail구현체 두개 다 검사 현재 로그인은 권한은 상관없으니 userDetail구현체 존재의 유무만 확인)
                 true : 무조건my페이지요청
                 false : 로그인 전에 요청하던 페이지가있는 경우 해당페이지로감 그 외는 /my
                  */
-                .permitAll()); 
+                .permitAll()
+                )
+                .exceptionHandling((e) -> e
+                .accessDeniedPage("/accessDenied") // 권한 부족 시 이동할 페이지
+        );
 
         http.logout((a)->a.logoutUrl("/logout")//logout이라는 요청이들어오면?
                 .logoutSuccessUrl("/login") //성공시 login 페이지로
