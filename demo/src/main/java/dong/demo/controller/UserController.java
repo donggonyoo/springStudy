@@ -26,7 +26,7 @@ public class UserController {
     @GetMapping("users")
     public String getUsers(Model model , HttpServletRequest request) {
         String userId = request.getParameter("userId");
-        if(userId==null){
+        if(userId==null ){
             List<UserDto> all = service.findAll();
             System.out.println(all);
             System.out.println("접근완료");
@@ -34,7 +34,8 @@ public class UserController {
             return "user/users";
         }
         else{
-            model.addAttribute("users", userId);
+            UserDto dto = service.findById(userId);
+            model.addAttribute("user", dto);
             return "user/update";
         }
 
@@ -47,12 +48,12 @@ public class UserController {
     @DeleteMapping("users")
     public String deleteUser(@RequestParam String deleteUserId) {
         System.out.println("delete : "+deleteUserId);
-        return "user/users";
+        return "redirect:/user/users";
     }
     @PutMapping("users")
-    public String updateUser(@RequestParam String updateUserId) {
+    public String updateUser(@RequestParam String updateUserId,HttpServletRequest request) {
         System.out.println("PUT : "+updateUserId);
-        return "user/users";
+        return "redirect:/user/users";
     }
 
 

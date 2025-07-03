@@ -1,11 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
 <body>
-<h2 th:text="${users}"></h2>
+<div id="userUpdate">
+    <input type="text" name="updateUserId"  th:value="${user.userId}" readonly>
+    <input type="password"   th:value="${user.password}" readonly>
 
+    <form  th:action="@{/user/users}" method="post">
+        <input type="hidden" name="_method" value="PUT">
+        <input type="hidden" name="updateUserId"  th:value="${user.userId}" >
+        <button type="submit">Update</button>
+    </form>
+    <form th:action="@{/user/users}" method="post">
+        <input type="hidden" name="_method" value="DELETE">
+        <input type="hidden" name="deleteUserId"  th:value="${user.userId}" >
+        <button type="submit">DELETE</button>
+    </form>
+</div>
 </body>
 </html>

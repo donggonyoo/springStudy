@@ -20,4 +20,10 @@ public class UserSerivce {
         List<UserDto> user = userMapper.findAll();
         return user;
     }
+
+    public UserDto findById(String userId) {
+        System.out.println("findById");
+        UserDto dto = userMapper.findById(userId);
+        return dto;
+    }
 }

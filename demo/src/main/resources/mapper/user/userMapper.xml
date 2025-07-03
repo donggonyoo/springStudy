@@ -6,4 +6,8 @@
 <select id="findAll" resultType="UserDto">
     select * from demo
 </select>
+
+    <select id="findById" resultType="UserDto" parameterType="String">
+        select * from demo where userid=#{val}
+    </select>
 </mapper>

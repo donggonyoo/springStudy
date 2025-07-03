@@ -14,20 +14,14 @@
             <td th:text="${user?.userId ?: 'N/A'}" ></td>
             <td th:text="${user?.userName ?: 'N/A'}" ></td>
                 <input type="hidden" name="userId" th:value="${user?.userId ?: 'N/A'}" />
-            <td><button>클릭</button></td>
+            <td><button>업데이트</button></td>
             </form>
         </tr>
     </table>
 
 
 
-<div id="userUpdate">
-    <form  th:action="@{/user/users}" method="post">
-        <input type="hidden" name="_method" value="PUT">
-        <input type="text" name="updateUserId"  placeholder="Enter User ID to Update">
-        <button type="submit">Update</button>
-    </form>
-</div>
+
 
 <form  th:action="@{/user/users}" method="post">
     <input type="hidden" name="_method" value="DELETE">
