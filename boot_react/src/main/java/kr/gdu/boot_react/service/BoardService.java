@@ -43,6 +43,6 @@ public class BoardService {
         boardEntity.setName(param.get("name"));
         boardEntity.setContent(param.get("content"));
         boardEntity.setFile1(param.get("file2"));
-        boardRepository.save(boardEntity);
+        boardRepository.save(boardEntity); //데이터저장
     }
 }
