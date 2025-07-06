@@ -6,7 +6,13 @@
 </head>
 <body>
 <h3 th:text="${msg}"></h3>
-<a href="logout" style="color: red">로그아웃</a>
-
+<a href="/logout" style="color: red">로그아웃</a>
+<a th:href="${url}" style="color : blue">나의페이지로</a>
+<button onclick="home()">공용 페이지로</button>
+<script>
+    function home(){
+        location.href = "../my";
+    }
+</script>
 </body>
 </html>

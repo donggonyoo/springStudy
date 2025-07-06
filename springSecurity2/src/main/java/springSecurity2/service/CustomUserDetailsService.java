@@ -16,8 +16,7 @@ import springSecurity2.repository.UserRepository;
 @RequiredArgsConstructor
 @Log4j2
 public class CustomUserDetailsService implements UserDetailsService {
-
-
+    
     private final UserRepository userRepository;
 
     /*
@@ -26,7 +25,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity userData = userRepository.findByUsername(username);
+        UserEntity userData = userRepository.findByUsername(username);//이름(아이디)를 이용해 객체를 반환
         if(userData != null) {
             //Spring Security가 이를 사용해 인증(예: 비밀번호 검증)을 진행하도록 합니다.
             return new CustomUserDetails(userData);
